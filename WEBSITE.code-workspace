@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../Desktop/WEBSITE"
+		},
+		{
+			"path": "../../Desktop/TEST 1"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "WEBSITE"
+	}
+}
