@@ -43,7 +43,7 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// HERO CARD
+              /// HERO
               Hero(
                 tag: "notepad",
                 child: Material(
@@ -63,9 +63,9 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
                         ),
                       ],
                     ),
-                    child: Column(
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Chip(
                           label: Text("Featured"),
                           backgroundColor: Color(0xFFFFC857),
@@ -93,31 +93,7 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
               /// PREVIEW
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: NotepadWidgetPreview(
-                    theme: theme,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              /// STATS
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    _Stat(title: "12.4k", subtitle: "Downloads"),
-                    _Stat(title: "8.2k", subtitle: "Saves"),
-                    _Stat(title: "4.9", subtitle: "Rating"),
-                  ],
-                ),
+                child: NotepadWidgetPreview(theme: theme),
               ),
 
               const SizedBox(height: 28),
@@ -130,6 +106,7 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
+
               const SizedBox(height: 12),
 
               Padding(
@@ -147,23 +124,6 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
                     _StyleCard("Pastel", () => _setTheme("pastel")),
                     _StyleCard("Neon", () => _setTheme("neon")),
                   ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              /// ABOUT
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  "About this widget",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                child: Text(
-                  "The notepad widget lets you quickly jot down thoughts, todos, and reminders directly on your home screen. Customize its look to match your vibe.",
                 ),
               ),
 
@@ -185,9 +145,7 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
                       id: DateTime.now().millisecondsSinceEpoch.toString(),
                       type: "notepad",
                       title: "Personal Notepad",
-                      config: {
-                        "theme": theme,
-                      },
+                      config: {"theme": theme},
                       createdAt: DateTime.now(),
                     );
 
@@ -203,16 +161,9 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
 
               const SizedBox(height: 16),
 
-              /// BACK
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
                   onPressed: () => Navigator.pop(context),
                   child: const Text("Back"),
                 ),
@@ -223,26 +174,6 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// -------- UI COMPONENTS --------
-
-class _Stat extends StatelessWidget {
-  final String title;
-  final String subtitle;
-
-  const _Stat({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(subtitle, style: const TextStyle(color: Colors.grey)),
-      ],
     );
   }
 }
@@ -263,10 +194,7 @@ class _StyleCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           color: const Color(0xFFEDE7DF),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
+        child: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
       ),
     );
   }
