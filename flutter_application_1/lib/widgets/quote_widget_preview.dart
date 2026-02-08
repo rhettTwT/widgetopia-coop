@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-class QuoteWidgetPreview extends StatefulWidget {
+class QuoteWidgetPreview extends StatelessWidget {
   final String quote;
   final String author;
 
@@ -12,80 +12,46 @@ class QuoteWidgetPreview extends StatefulWidget {
   });
 
   @override
-  State<QuoteWidgetPreview> createState() => _QuoteWidgetPreviewState();
-}
-
-class _QuoteWidgetPreviewState extends State<QuoteWidgetPreview>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 6))
-          ..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (_, child) {
-        final offset = sin(_controller.value * pi * 2) * 6;
-        return Transform.translate(
-          offset: Offset(0, offset),
-          child: child,
-        );
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFE8D8), Color(0xFFFFF4EC)],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFE8D8), Color(0xFFFFF4EC)],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFFCFA8).withOpacity(0.6),
-              blurRadius: 40,
-              offset: const Offset(0, 20),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "“$quote”",
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              height: 1.4,
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.quote,
-              style: const TextStyle(
-                fontSize: 22,
-                height: 1.4,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF2E241C),
-              ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "— $author",
+            style: const TextStyle(
+              color: Colors.black54,
             ),
-            const SizedBox(height: 12),
-            Text(
-              widget.author,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF8B7A6B),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
+
 
 
 /// Grain painter (safe + performant)

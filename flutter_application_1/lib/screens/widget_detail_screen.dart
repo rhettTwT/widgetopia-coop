@@ -5,152 +5,201 @@ import 'package:widgetopia/widgets/notepad_widget_preview.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
 
-
-
 class WidgetDetailScreen extends StatelessWidget {
   final String title;
   final String tag;
+  final String type;
 
   const WidgetDetailScreen({
     super.key,
     required this.title,
     required this.tag,
+    required this.type,
   });
+
+  Widget _buildPreview() {
+    switch (type) {
+      case "quote":
+        return const QuoteWidgetPreview(
+          quote: "Lets get this shit started",
+          author: "Me",
+        );
+      case "pomodoro":
+        return const PomodoroWidgetPreview();
+      case "notepad":
+        return const NotepadWidgetPreview(theme: '',);
+      default:
+        return const SizedBox();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8EE),
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            children: [
-              /// HERO CARD
-              Hero(
-                tag: title,
-                child: Material(
-                  color: Colors.transparent,
-                  child: Container(
-                    height: 260,
-                    margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
+        child: Column(
+          children: [
+            /// HEADER + HERO CARD
+            Stack(
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  height: 280,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(28),
+                    color: Colors.black,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 30,
+                        offset: const Offset(0, 16),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(28),
+                    child: Container(
                       color: const Color(0xFF1F2933),
-                      borderRadius: BorderRadius.circular(32),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
-                          blurRadius: 30,
-                          offset: const Offset(0, 18),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Chip(
-                          label: Text(tag),
-                          backgroundColor: Colors.white24,
-                        ),
-                        const Spacer(),
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          "Live widget preview",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ],
                     ),
                   ),
                 ),
-              ),
 
-              /// CONTENT FADE + SLIDE IN
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeOutCubic,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: value,
-                    child: Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: child,
+                Positioned(
+                  top: 28,
+                  left: 28,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      /// REAL PREVIEWS
-                      QuoteWidgetPreview(quote: 'Im tired', author: 'fuck you',),
-                      const SizedBox(height: 20),
-                      PomodoroWidgetPreview(),
-                      NotepadWidgetPreview(),
+                  ),
+                ),
 
-                      const SizedBox(height: 28),
-
-                      /// PRIMARY ACTION
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 52),
-                          backgroundColor: const Color(0xFF6B4F3A),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                        ),
-                        onPressed: () async {
-                          final widget = SavedWidgetModel(
-                            id: DateTime.now().millisecondsSinceEpoch.toString(),
-                            type: "quote",
-                            title: title,
-                            config: {
-                              "quote": "Lets get this shit started",
-                              "author": "You",
-                            },
-                            createdAt: DateTime.now(),
-                          );
-
-                          await SavedWidgetsService.save(widget);
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Widget saved 💾")),
-                          );
-                        },
-                        child: const Text("Add to Home Screen"),
+                Positioned(
+                  top: 28,
+                  right: 28,
+                  child: Row(
+                    children: const [
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.share),
                       ),
-
-
-                      const SizedBox(height: 12),
-
-                      /// BACK BUTTON
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 52),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Back"),
+                      SizedBox(width: 12),
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(Icons.favorite_border),
                       ),
-
-                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
+
+                Positioned(
+                  bottom: 24,
+                  left: 32,
+                  right: 32,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Chip(
+                        label: Text(tag),
+                        backgroundColor: const Color(0xFFFFC857),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "Perfect for your home screen ✨",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 12),
+
+                    /// PREVIEW CARD
+                    Center(child: _buildPreview()),
+
+                    const SizedBox(height: 28),
+
+                    /// ABOUT
+                    const Text(
+                      "About this widget",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "This widget is designed to match your vibe and sit beautifully on your home screen. Customize it however you like.",
+                      style: TextStyle(color: Colors.black54),
+                    ),
+
+                    const SizedBox(height: 80),
+                  ],
+                ),
               ),
-            ],
-          ),
+            ),
+
+            /// FIXED BOTTOM BUTTON
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF8EE),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, -6),
+                  ),
+                ],
+              ),
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 56),
+                  backgroundColor: const Color(0xFF6B4F3A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+                onPressed: () async {
+                  final widget = SavedWidgetModel(
+                    id: DateTime.now().millisecondsSinceEpoch.toString(),
+                    type: type,
+                    title: title,
+                    config: {},
+                    createdAt: DateTime.now(),
+                  );
+
+                  await SavedWidgetsService.save(widget);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Widget saved 💾")),
+                  );
+                },
+                icon: const Icon(Icons.download),
+                label: const Text("Add to Home Screen"),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
 import 'package:widgetopia/widgets/quote_widget_preview.dart';
+import 'package:widgetopia/widgets/pomodoro_widget_preview.dart';
+import 'package:widgetopia/widgets/notepad_widget_preview.dart';
 import 'package:widgetopia/screens/widget_detail_screen.dart';
 
 class SavedScreen extends StatefulWidget {
@@ -22,12 +24,15 @@ class _SavedScreenState extends State<SavedScreen> {
 
   Widget _buildPreview(SavedWidgetModel item) {
     switch (item.type) {
-      case 'quote':
-        return QuoteWidgetPreview(
-          quote: item.config['quote'] ?? '',
-          author: item.config['author'] ?? '',
+      case "quote":
+        return const QuoteWidgetPreview(
+          quote: "Saved Quote",
+          author: "You",
         );
-
+      case "pomodoro":
+        return const PomodoroWidgetPreview();
+      case "notepad":
+        return const NotepadWidgetPreview(theme: '',);
       default:
         return const SizedBox();
     }
@@ -40,16 +45,14 @@ class _SavedScreenState extends State<SavedScreen> {
       body: FutureBuilder<List<SavedWidgetModel>>(
         future: _savedWidgets,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+          if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final items = snapshot.data ?? [];
+          final items = snapshot.data!;
 
           if (items.isEmpty) {
-            return const Center(
-              child: Text("No saved widgets yet"),
-            );
+            return const Center(child: Text("No saved widgets yet"));
           }
 
           return ListView.separated(
@@ -67,6 +70,7 @@ class _SavedScreenState extends State<SavedScreen> {
                       builder: (_) => WidgetDetailScreen(
                         title: item.title,
                         tag: item.type,
+                        type: item.type,
                       ),
                     ),
                   );

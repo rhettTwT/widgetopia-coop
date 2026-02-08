@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:widgetopia/screens/widget_detail_screen.dart';
 import 'package:widgetopia/widgets/ambient_background.dart';
+import 'package:widgetopia/screens/notpad_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -46,7 +47,6 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // Trending collections
               const _SectionHeader(title: "Trending Collections"),
               const SizedBox(height: 12),
 
@@ -67,20 +67,32 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              // Featured
               const _SectionHeader(title: "Featured Today"),
               const SizedBox(height: 12),
               const FeaturedCard(),
 
               const SizedBox(height: 28),
 
-              // For You Feed
               const _SectionHeader(title: "For You"),
               const SizedBox(height: 12),
 
-              const FeedCard(title: "Minimal Focus Widget", tag: "productivity"),
-              const FeedCard(title: "Cozy Night Quote Pack", tag: "cozy"),
-              const FeedCard(title: "Study Timer Aesthetic", tag: "minimal"),
+              FeedCard(
+                title: "Cozy Study Timer",
+                tag: "cozy",
+                type: "pomodoro",
+              ),
+
+              FeedCard(
+                title: "Daily Quote",
+                tag: "quote",
+                type: "quote",
+              ),
+
+              FeedCard(
+                title: "Personal Notepad",
+                tag: "notes",
+                type: "notepad",
+              ),
             ],
           ),
         ),
@@ -89,12 +101,11 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// ---------------- CHIPS ----------------
+// ---------------- UI PARTS ----------------
 
 class _Chip extends StatelessWidget {
   final String label;
   final bool selected;
-
   const _Chip({required this.label, this.selected = false});
 
   @override
@@ -117,8 +128,6 @@ class _Chip extends StatelessWidget {
   }
 }
 
-// ---------------- SECTION HEADER ----------------
-
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader({required this.title});
@@ -127,28 +136,19 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: const [
-        Text(
-          " ",
-          style: TextStyle(fontSize: 0),
-        ),
+      children: [
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text("See all", style: TextStyle(color: Colors.grey)),
       ],
     );
   }
 }
 
-// ---------------- COLLECTION CARD ----------------
-
 class CollectionCard extends StatelessWidget {
   final String title;
   final String count;
   final Color color;
-
-  const CollectionCard({
-    required this.title,
-    required this.count,
-    required this.color,
-  });
+  const CollectionCard({required this.title, required this.count, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -178,8 +178,6 @@ class CollectionCard extends StatelessWidget {
   }
 }
 
-// ---------------- FEATURED CARD ----------------
-
 class FeaturedCard extends StatelessWidget {
   const FeaturedCard({super.key});
 
@@ -190,15 +188,9 @@ class FeaturedCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2F2F2F), Color(0xFF1A1A1A)],
-        ),
+        gradient: const LinearGradient(colors: [Color(0xFF2F2F2F), Color(0xFF1A1A1A)]),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.25),
-            blurRadius: 30,
-            offset: const Offset(0, 16),
-          ),
+          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 30, offset: const Offset(0, 16)),
         ],
       ),
       child: const Column(
@@ -206,10 +198,7 @@ class FeaturedCard extends StatelessWidget {
         children: [
           Chip(label: Text("Featured"), backgroundColor: Color(0xFFFFC857)),
           Spacer(),
-          Text(
-            "Cozy Study Timer",
-            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          Text("Cozy Study Timer", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
           SizedBox(height: 4),
           Text("Perfect for calm study sessions ☕", style: TextStyle(color: Colors.white70)),
         ],
@@ -218,23 +207,35 @@ class FeaturedCard extends StatelessWidget {
   }
 }
 
-// ---------------- FEED CARD (Hero + Animation) ----------------
-
 class FeedCard extends StatelessWidget {
   final String title;
   final String tag;
+  final String type;
 
-  const FeedCard({super.key, required this.title, required this.tag});
+  const FeedCard({super.key, required this.title, required this.tag, required this.type});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        if (type == "notepad") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const NotepadDetailScreen(), // your custom notepad page
+            ),
+          );
+          return;
+        }
+
         Navigator.of(context).push(
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 500),
-            pageBuilder: (_, __, ___) =>
-                WidgetDetailScreen(title: title, tag: tag),
+            pageBuilder: (_, __, ___) => WidgetDetailScreen(
+              title: title,
+              tag: tag,
+              type: type,
+            ),
             transitionsBuilder: (_, animation, __, child) {
               final curved = CurvedAnimation(
                 parent: animation,
@@ -267,11 +268,7 @@ class FeedCard extends StatelessWidget {
               color: const Color(0xFF1F2933),
               borderRadius: BorderRadius.circular(26),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 24,
-                  offset: const Offset(0, 14),
-                ),
+                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 24, offset: const Offset(0, 14)),
               ],
             ),
             child: Column(
@@ -279,13 +276,7 @@ class FeedCard extends StatelessWidget {
               children: [
                 Chip(label: Text(tag), backgroundColor: Colors.white24),
                 const Spacer(),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
