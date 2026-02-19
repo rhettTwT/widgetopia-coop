@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:widgetopia/screens/home_screen.dart';
+import 'package:widgetopia/screens/saved_screen.dart';
+import 'package:widgetopia/screens/home_dashboard_screen.dart';
 
 void main() {
   runApp(const WidgetopiaApp());
@@ -47,7 +49,6 @@ class WidgetopiaApp extends StatelessWidget {
           ),
         ),
       ),
-
       home: const MainNavigation(),
     );
   }
@@ -65,17 +66,18 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final pages = const [
     HomeScreen(),
+    HomeDashboardScreen(), // 👈 this is now your real home screen
     ExploreScreen(),
     TrendingScreen(),
     SavedScreen(),
     ProfileScreen(),
   ];
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: pages[index],
-
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (i) => setState(() => index = i),
@@ -93,13 +95,16 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 }
 
-//temporary 
+/// TEMP PLACEHOLDERS (we'll design later)
+
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("Explore"));
+    return const Scaffold(
+      body: Center(child: Text("Explore")),
+    );
   }
 }
 
@@ -108,16 +113,9 @@ class TrendingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("Trending"));
-  }
-}
-
-class SavedScreen extends StatelessWidget {
-  const SavedScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text("Saved"));
+    return const Scaffold(
+      body: Center(child: Text("Trending")),
+    );
   }
 }
 
@@ -126,6 +124,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("Profile"));
+    return const Scaffold(
+      body: Center(child: Text("Profile")),
+    );
   }
 }
