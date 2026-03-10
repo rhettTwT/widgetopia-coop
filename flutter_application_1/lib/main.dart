@@ -4,6 +4,7 @@ import 'package:widgetopia/screens/saved_widget_screen.dart';
 import 'package:widgetopia/screens/explore_screen.dart';
 import 'package:widgetopia/screens/trending_screen.dart';
 import 'package:widgetopia/screens/profile_screen.dart';
+import 'package:widgetopia/screens/habit_tracker_screen.dart';
 
 void main() {
   runApp(const WidgetopiaApp());
@@ -69,6 +70,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final pages = const [
     HomeScreen(),
     ExploreScreen(),
+    HabitTrackerScreen(),
     TrendingScreen(),
     SavedScreen(),
     ProfileScreen(),
@@ -87,6 +89,7 @@ class _MainNavigationState extends State<MainNavigation> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home), label: "Home"),
           NavigationDestination(icon: Icon(Icons.search), label: "Explore"),
+          NavigationDestination(icon: Icon(Icons.check_circle_outline), label: "Habits"),
           NavigationDestination(icon: Icon(Icons.trending_up), label: "Trending"),
           NavigationDestination(icon: Icon(Icons.bookmark), label: "Saved"),
           NavigationDestination(icon: Icon(Icons.person), label: "Profile"),
