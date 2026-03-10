@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:widgetopia/screens/notpad_detail_screen.dart';
+import 'package:widgetopia/screens/notepad_detail_screen.dart';
 
 class NotepadWidgetCard extends StatelessWidget {
   const NotepadWidgetCard({super.key});

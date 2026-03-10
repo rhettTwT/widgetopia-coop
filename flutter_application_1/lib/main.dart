@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:widgetopia/screens/home_screen.dart';
-import 'package:widgetopia/screens/saved_screen.dart';
+import 'package:widgetopia/screens/saved_widget_screen.dart';
 import 'package:widgetopia/screens/explore_screen.dart';
 import 'package:widgetopia/screens/trending_screen.dart';
 import 'package:widgetopia/screens/profile_screen.dart';

@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:widgetopia/screens/widget_detail_screen.dart';
 import 'package:widgetopia/widgets/ambient_background.dart';
-import 'package:widgetopia/screens/notpad_detail_screen.dart';
+import 'package:widgetopia/screens/notepad_detail_screen.dart';
 import 'package:widgetopia/screens/timer_screen.dart';
+import 'package:widgetopia/screens/calendar_screen.dart';
+import 'package:widgetopia/screens/quote_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -95,6 +98,12 @@ class HomeScreen extends StatelessWidget {
                 title: "Personal Notepad",
                 tag: "notes",
                 type: "notepad",
+              ),
+
+              FeedCard(
+                title: "Aesthetic Calendar",
+                tag: "minimal",
+                type: "calendar",
               ),
             ],
           ),
@@ -218,10 +227,80 @@ class FeedCard extends StatelessWidget {
   const FeedCard({super.key, required this.title, required this.tag, required this.type});
 
   void _navigate(BuildContext context) {
+    if (type == "quote") {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (c, a, s) => const QuoteScreen(),
+          transitionsBuilder: (c, animation, s, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            );
+          },
+        ),
+      );
+      return;
+    }
+
     if (type == "notepad") {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const NotepadDetailScreen()),
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (c, a, s) => const NotepadDetailScreen(),
+          transitionsBuilder: (c, animation, s, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            );
+          },
+        ),
+      );
+      return;
+    }
+
+    if (type == "calendar") {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (c, a, s) => const CalendarScreen(),
+          transitionsBuilder: (c, animation, s, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            );
+          },
+        ),
       );
       return;
     }
@@ -286,6 +365,27 @@ class FeedCard extends StatelessWidget {
       return GestureDetector(
         onTap: () => _navigate(context),
         child: const _CozyTimerCard(),
+      );
+    }
+
+    if (type == "calendar") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _CalendarFeedCard(),
+      );
+    }
+
+    if (type == "notepad") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _NotepadFeedCard(),
+      );
+    }
+
+    if (type == "quote") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _QuoteFeedCard(),
       );
     }
 
@@ -550,6 +650,436 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
           ),
         );
       },
+    );
+  }
+}
+
+// ─────────── Calendar Feed Card (Home Screen) ───────────
+
+class _CalendarFeedCard extends StatelessWidget {
+  const _CalendarFeedCard();
+
+  static const _cardBg = Color(0xFFFFF8EE);
+  static const _primary = Color(0xFFD4A574);
+  static const _accent = Color(0xFFC08552);
+  static const _textColor = Color(0xFF4A3728);
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final monthName = DateFormat('MMMM').format(now);
+    final dayName = DateFormat('EEE').format(now);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: _primary.withValues(alpha: 0.15),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Header
+          Row(
+            children: [
+              const Text('📅', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 8),
+              const Text(
+                'Aesthetic Calendar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: _textColor,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'Planner',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _accent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Mini calendar preview
+          Row(
+            children: [
+              // Date circle
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _primary.withValues(alpha: 0.12),
+                  border: Border.all(
+                    color: _primary.withValues(alpha: 0.25),
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${now.day}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: _accent,
+                      ),
+                    ),
+                    Text(
+                      dayName.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: _textColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Right side info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$monthName ${now.year}',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w300,
+                        color: _textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Tap card to expand →',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _accent.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          // Mini week dots
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(7, (i) {
+              final isToday = i == (now.weekday - 1);
+              return Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isToday
+                      ? _primary
+                      : _primary.withValues(alpha: 0.08),
+                ),
+                child: Center(
+                  child: Text(
+                    ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: isToday
+                          ? Colors.white
+                          : _textColor.withValues(alpha: 0.45),
+                    ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────── Notepad Feed Card (Home Screen) ───────────
+
+class _NotepadFeedCard extends StatelessWidget {
+  const _NotepadFeedCard();
+
+  static const _cardBg = Color(0xFFFFF8EE);
+  static const _primary = Color(0xFFD4A574);
+  static const _accent = Color(0xFFC08552);
+  static const _textColor = Color(0xFF4A3728);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: _primary.withValues(alpha: 0.15),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            children: [
+              const Text('📝', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 8),
+              const Text(
+                'Personal Notepad',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: _textColor,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'Notes',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _accent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Mini preview lines (ruled paper feel)
+          ...List.generate(3, (i) {
+            final texts = ['Buy groceries 🛒', 'Finish assignment', 'Call mom ☎️'];
+            final dones = [false, true, false];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      border: Border.all(
+                        color: dones[i]
+                            ? _primary
+                            : _primary.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                      color: dones[i]
+                          ? _primary.withValues(alpha: 0.12)
+                          : Colors.transparent,
+                    ),
+                    child: dones[i]
+                        ? const Icon(Icons.check_rounded,
+                            size: 13, color: _accent)
+                        : null,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      texts[i],
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: dones[i]
+                            ? _textColor.withValues(alpha: 0.35)
+                            : _textColor,
+                        decoration: dones[i]
+                            ? TextDecoration.lineThrough
+                            : null,
+                        decorationColor:
+                            _textColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+
+          const SizedBox(height: 8),
+
+          // Bottom hint
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'Tap card to expand →',
+              style: TextStyle(
+                fontSize: 12,
+                color: _accent.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────── Quote Feed Card (Home Screen) ───────────
+
+class _QuoteFeedCard extends StatelessWidget {
+  const _QuoteFeedCard();
+
+  static const _cardBg = Color(0xFFFFF8EE);
+  static const _primary = Color(0xFFD4A574);
+  static const _accent = Color(0xFFC08552);
+  static const _textColor = Color(0xFF4A3728);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: _primary.withValues(alpha: 0.15),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            children: [
+              const Text('💬', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 8),
+              const Text(
+                'Daily Quote',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: _textColor,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _primary.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'Inspire',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _accent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Featured quote
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _primary.withValues(alpha: 0.08),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '\u201C',
+                  style: TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w900,
+                    color: _primary.withValues(alpha: 0.25),
+                    height: 0.6,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Small steps every day lead to big changes.',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    fontStyle: FontStyle.italic,
+                    color: _textColor,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '— Unknown',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _accent.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      'Tap card to expand →',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: _accent.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
