@@ -51,7 +51,7 @@ class WidgetDetailScreen extends StatelessWidget {
                     color: Colors.black,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
+                        color: Colors.black.withValues(alpha: 0.25),
                         blurRadius: 30,
                         offset: const Offset(0, 16),
                       ),
@@ -166,7 +166,7 @@ class WidgetDetailScreen extends StatelessWidget {
                 color: const Color(0xFFFFF8EE),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 12,
                     offset: const Offset(0, -6),
                   ),
@@ -191,6 +191,7 @@ class WidgetDetailScreen extends StatelessWidget {
 
                   await SavedWidgetsService.save(widget);
 
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Widget saved 💾")),
                   );

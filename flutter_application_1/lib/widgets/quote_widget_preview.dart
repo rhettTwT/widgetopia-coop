@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 
 class QuoteWidgetPreview extends StatelessWidget {
@@ -22,7 +21,7 @@ class QuoteWidgetPreview extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 12),
           ),
@@ -52,29 +51,3 @@ class QuoteWidgetPreview extends StatelessWidget {
   }
 }
 
-
-
-/// Grain painter (safe + performant)
-class _GrainPainter extends CustomPainter {
-  final Random random = Random();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black.withOpacity(0.03);
-
-    for (int i = 0; i < 900; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-
-      canvas.drawCircle(
-        Offset(x, y),
-        0.5, // grain size
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}

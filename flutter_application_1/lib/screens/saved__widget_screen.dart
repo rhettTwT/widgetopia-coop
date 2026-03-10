@@ -58,7 +58,7 @@ class _SavedScreenState extends State<SavedScreen> {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 20),
+            separatorBuilder: (_, _) => const SizedBox(height: 20),
             itemBuilder: (context, index) {
               final item = items[index];
 

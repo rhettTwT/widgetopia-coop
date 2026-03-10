@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/note_model.dart';
 
-class ChecklistItemTile extends StatelessWidget {
+class ChecklistItemTile extends StatelessWidget{
   final ChecklistItem item;
   final VoidCallback onToggle;
   final VoidCallback onDelete;
@@ -16,7 +16,7 @@ class ChecklistItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: UniqueKey(),
+      key: UniqueKey(), 
       direction: DismissDirection.horizontal,
       onDismissed: (_) => onDelete(),
       background: Container(color: Colors.red),
@@ -28,10 +28,10 @@ class ChecklistItemTile extends StatelessWidget {
         title: Text(
           item.text,
           style: TextStyle(
-            decoration:
+            decoration: 
                 item.done ? TextDecoration.lineThrough : TextDecoration.none,
             color: item.done ? Colors.grey : null,
-          ),
+          ), 
         ),
       ),
     );

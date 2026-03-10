@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:widgetopia/screens/home_screen.dart';
 import 'package:widgetopia/screens/saved_screen.dart';
-import 'package:widgetopia/screens/home_dashboard_screen.dart';
+import 'package:widgetopia/screens/explore_screen.dart';
+import 'package:widgetopia/screens/trending_screen.dart';
+import 'package:widgetopia/screens/profile_screen.dart';
 
 void main() {
   runApp(const WidgetopiaApp());
@@ -20,7 +22,7 @@ class WidgetopiaApp extends StatelessWidget {
 
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFFFDFA8),
-          background: const Color(0xFFFFF4D6),
+          surface: const Color(0xFFFFF4D6),
         ),
 
         scaffoldBackgroundColor: const Color(0xFFFFF4D6),
@@ -66,7 +68,6 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final pages = const [
     HomeScreen(),
-    HomeDashboardScreen(), // 👈 this is now your real home screen
     ExploreScreen(),
     TrendingScreen(),
     SavedScreen(),
@@ -95,37 +96,4 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 }
 
-/// TEMP PLACEHOLDERS (we'll design later)
 
-class ExploreScreen extends StatelessWidget {
-  const ExploreScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("Explore")),
-    );
-  }
-}
-
-class TrendingScreen extends StatelessWidget {
-  const TrendingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("Trending")),
-    );
-  }
-}
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: Text("Profile")),
-    );
-  }
-}

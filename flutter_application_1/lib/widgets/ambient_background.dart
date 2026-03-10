@@ -58,7 +58,7 @@ class _Glow extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withOpacity(0.6),
+        color: color.withValues(alpha: 0.6),
       ),
     );
   }

@@ -57,7 +57,7 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.25),
+                          color: Colors.black.withValues(alpha: 0.25),
                           blurRadius: 30,
                           offset: const Offset(0, 18),
                         ),
@@ -151,6 +151,7 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen> {
 
                     await SavedWidgetsService.save(widget);
 
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Notepad added to home 💾")),
                     );

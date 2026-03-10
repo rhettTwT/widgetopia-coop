@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:widgetopia/screens/explore_screen.dart';
-import 'package:widgetopia/Screens/trending_screen.dart';
 import 'package:widgetopia/screens/saved_screen.dart';
 import 'package:widgetopia/screens/profile_screen.dart';
+import 'package:widgetopia/screens/trending_screen.dart';
 import 'home_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -32,7 +32,7 @@ class _MainShellState extends State<MainShell> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
             )
           ],

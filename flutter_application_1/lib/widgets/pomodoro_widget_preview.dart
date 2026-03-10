@@ -47,7 +47,7 @@ class _PomodoroWidgetPreviewState extends State<PomodoroWidgetPreview> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.25),
+            color: Colors.black.withValues(alpha: 0.25),
             blurRadius: 30,
             offset: const Offset(0, 16),
           )
@@ -79,7 +79,7 @@ class _PomodoroWidgetPreviewState extends State<PomodoroWidgetPreview> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -98,7 +98,7 @@ class _PomodoroWidgetPreviewState extends State<PomodoroWidgetPreview> {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
               color: const Color(0xFFFFB703),
             ),
           ),

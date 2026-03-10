@@ -45,7 +45,7 @@ class NotepadWidgetPreview extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -70,7 +70,7 @@ class NotepadWidgetPreview extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(Icons.check_circle_outline,
-                      size: 18, color: _fg.withOpacity(0.7)),
+                      size: 18, color: _fg.withValues(alpha: 0.7)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

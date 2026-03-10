@@ -148,7 +148,7 @@ class CollectionCard extends StatelessWidget {
   final String title;
   final String count;
   final Color color;
-  const CollectionCard({required this.title, required this.count, required this.color});
+  const CollectionCard({super.key, required this.title, required this.count, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +159,7 @@ class CollectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 8),
           ),
@@ -190,7 +190,7 @@ class FeaturedCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(26),
         gradient: const LinearGradient(colors: [Color(0xFF2F2F2F), Color(0xFF1A1A1A)]),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 30, offset: const Offset(0, 16)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 30, offset: const Offset(0, 16)),
         ],
       ),
       child: const Column(
@@ -231,12 +231,12 @@ class FeedCard extends StatelessWidget {
         Navigator.of(context).push(
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 500),
-            pageBuilder: (_, __, ___) => WidgetDetailScreen(
+            pageBuilder: (_, _, _) => WidgetDetailScreen(
               title: title,
               tag: tag,
               type: type,
             ),
-            transitionsBuilder: (_, animation, __, child) {
+            transitionsBuilder: (_, animation, _, child) {
               final curved = CurvedAnimation(
                 parent: animation,
                 curve: Curves.easeOutCubic,
@@ -268,7 +268,7 @@ class FeedCard extends StatelessWidget {
               color: const Color(0xFF1F2933),
               borderRadius: BorderRadius.circular(26),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 24, offset: const Offset(0, 14)),
+                BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 24, offset: const Offset(0, 14)),
               ],
             ),
             child: Column(
