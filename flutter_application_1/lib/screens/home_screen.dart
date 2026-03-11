@@ -8,6 +8,7 @@ import 'package:widgetopia/screens/notepad_detail_screen.dart';
 import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
+import 'package:widgetopia/screens/habit_tracker_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -104,6 +105,12 @@ class HomeScreen extends StatelessWidget {
                 title: "Aesthetic Calendar",
                 tag: "minimal",
                 type: "calendar",
+              ),
+
+              FeedCard(
+                title: "Habit Tracker",
+                tag: "personal",
+                type: "habit",
               ),
             ],
           ),
@@ -331,6 +338,32 @@ class FeedCard extends StatelessWidget {
       return;
     }
 
+    if (type == "habit") {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (c, a, s) => const HabitTrackerScreen(),
+          transitionsBuilder: (c, animation, s, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            );
+          },
+        ),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 500),
@@ -386,6 +419,13 @@ class FeedCard extends StatelessWidget {
       return GestureDetector(
         onTap: () => _navigate(context),
         child: const _QuoteFeedCard(),
+      );
+    }
+
+    if (type == "habit") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _HabitFeedCard(),
       );
     }
 
@@ -1126,4 +1166,156 @@ class _MiniRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _MiniRingPainter old) =>
       old.progress != progress;
+}
+
+// ─────────── Habit Feed Card (Home Screen) ───────────
+
+class _HabitFeedCard extends StatelessWidget {
+  const _HabitFeedCard();
+
+  static const _cardBg = Color(0xFFFFF8EE);
+  static const _primary = Color(0xFF7B61FF);
+  static const _accent = Color(0xFF6B4FE0);
+  static const _textColor = Color(0xFF4A3728);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _cardBg,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: _primary.withValues(alpha: 0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            children: [
+              const Text('🎯', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 8),
+              const Text(
+                'Habit Tracker',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: _textColor,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'Track',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _accent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Mini heatmap preview (5x7 dots)
+          Center(
+            child: Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: List.generate(35, (i) {
+                // Create a pattern that looks like scattered completions
+                final filled = [0,1,3,5,7,8,10,14,15,17,19,21,22,24,25,28,29,30,32,34].contains(i);
+                return Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: filled
+                        ? _primary.withValues(alpha: 0.2 + (i % 5) * 0.18)
+                        : const Color(0xFFEDE5D8),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                );
+              }),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Quick stats
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _QuickStat(label: 'Habits', value: '4', color: _primary),
+              _QuickStat(
+                  label: 'Streak', value: '7 🔥', color: const Color(0xFFFF7043)),
+              _QuickStat(
+                  label: 'Today', value: '2/4', color: const Color(0xFF69F0AE)),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'Tap card to expand →',
+              style: TextStyle(
+                fontSize: 12,
+                color: _accent.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _QuickStat({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            color: Color(0xFF8C776A),
+          ),
+        ),
+      ],
+    );
+  }
 }

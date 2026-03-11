@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:widgetopia/widgets/quote_widget_preview.dart';
 import 'package:widgetopia/widgets/pomodoro_widget_preview.dart';
 import 'package:widgetopia/widgets/notepad_widget_preview.dart';
+import 'package:widgetopia/widgets/habit_widget_preview.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
 
@@ -27,7 +28,9 @@ class WidgetDetailScreen extends StatelessWidget {
       case "pomodoro":
         return const PomodoroWidgetPreview();
       case "notepad":
-        return const NotepadWidgetPreview(theme: '',);
+        return const NotepadWidgetPreview(theme: '');
+      case "habit":
+        return const HabitWidgetPreview(interactive: true);
       default:
         return const SizedBox();
     }
