@@ -9,13 +9,16 @@ import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
 import 'package:widgetopia/screens/habit_tracker_screen.dart';
+import 'package:widgetopia/utils/theme_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: AmbientBackground(
         child: SafeArea(
           child: ListView(
@@ -24,16 +27,16 @@ class HomeScreen extends StatelessWidget {
               // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text(
                     "Discover",
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E241C),
+                      color: c.textPrimary,
                     ),
                   ),
-                  Icon(Icons.search, color: Color(0xFF2E241C)),
+                  Icon(Icons.search, color: c.textPrimary),
                 ],
               ),
               const SizedBox(height: 16),
@@ -129,17 +132,18 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Container(
       margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: selected ? const Color(0xFF6B4F3A) : const Color(0xFFF1E8DD),
+        color: selected ? c.chipSelectedBg : c.chipBg,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: selected ? Colors.white : const Color(0xFF6B4F3A),
+          color: selected ? Colors.white : c.accent,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -153,11 +157,12 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const Text("See all", style: TextStyle(color: Colors.grey)),
+        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
+        Text("See all", style: TextStyle(color: c.textMuted)),
       ],
     );
   }
@@ -171,14 +176,15 @@ class CollectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color,
+        color: c.collectionCard(color),
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withValues(alpha: c.isDark ? 0.15 : 0.05),
             blurRadius: 12,
             offset: const Offset(0, 8),
           ),
@@ -188,9 +194,9 @@ class CollectionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Spacer(),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(title, style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
           const SizedBox(height: 4),
-          Text(count, style: const TextStyle(color: Colors.grey)),
+          Text(count, style: TextStyle(color: c.textMuted)),
         ],
       ),
     );
@@ -202,12 +208,15 @@ class FeaturedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Container(
       height: 230,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
-        gradient: const LinearGradient(colors: [Color(0xFF2F2F2F), Color(0xFF1A1A1A)]),
+        gradient: LinearGradient(colors: c.isDark
+            ? [const Color(0xFF2A2218), const Color(0xFF1A1410)]
+            : [const Color(0xFF2F2F2F), const Color(0xFF1A1A1A)]),
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 30, offset: const Offset(0, 16)),
         ],
@@ -520,13 +529,14 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
 
   double get _progress => _maxSeconds > 0 ? 1 - (_seconds / _maxSeconds) : 0;
 
-  static const _cardBg = Color(0xFFFFF0DC);
-  static const _primary = Color(0xFFD4A574);
-  static const _accent = Color(0xFFC08552);
-  static const _textColor = Color(0xFF4A3728);
-
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    final cardBg = c.feedCardBg;
+    final primary = c.primary;
+    final accent = c.accent;
+    final textColor = c.textPrimary;
+
     return AnimatedBuilder(
       animation: _breathAnim,
       builder: (context, child) {
@@ -535,11 +545,11 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: _cardBg,
+            color: cardBg,
             borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
-                color: _primary.withValues(alpha: 0.15 + bv * 0.08),
+                color: primary.withValues(alpha: c.isDark ? 0.08 : (0.15 + bv * 0.08)),
                 blurRadius: 24 + bv * 10,
                 offset: const Offset(0, 10),
               ),
@@ -550,17 +560,17 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
               // Top row: label + tag
               Row(
                 children: [
-                  Text(
+                  const Text(
                     '☕',
-                    style: const TextStyle(fontSize: 22),
+                    style: TextStyle(fontSize: 22),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'Cozy Study Timer',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: _textColor,
+                      color: textColor,
                     ),
                   ),
                   const Spacer(),
@@ -568,15 +578,15 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _primary.withValues(alpha: 0.15),
+                      color: primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Focus',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: _accent,
+                        color: accent,
                       ),
                     ),
                   ),
@@ -594,16 +604,16 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
                     child: CustomPaint(
                       painter: _MiniRingPainter(
                         progress: _progress,
-                        trackColor: _primary.withValues(alpha: 0.2),
-                        progressColor: _primary,
+                        trackColor: primary.withValues(alpha: 0.2),
+                        progressColor: primary,
                       ),
                       child: Center(
                         child: Text(
                           _format(_seconds),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: _textColor,
+                            color: textColor,
                             letterSpacing: 1,
                           ),
                         ),
@@ -621,7 +631,7 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
                           '25 min session',
                           style: TextStyle(
                             fontSize: 13,
-                            color: _textColor.withValues(alpha: 0.5),
+                            color: textColor.withValues(alpha: 0.5),
                           ),
                         ),
                         const SizedBox(height: 10),
@@ -636,12 +646,12 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   gradient: LinearGradient(
-                                    colors: [_primary, _accent],
+                                    colors: [primary, accent],
                                   ),
                                   boxShadow: [
                                     BoxShadow(
                                       color:
-                                          _primary.withValues(alpha: 0.3),
+                                          primary.withValues(alpha: 0.3),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -662,7 +672,7 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
                               'Tap card to expand →',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: _accent.withValues(alpha: 0.7),
+                                color: accent.withValues(alpha: 0.7),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -682,8 +692,8 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
                 child: LinearProgressIndicator(
                   value: _progress,
                   minHeight: 6,
-                  backgroundColor: _primary.withValues(alpha: 0.15),
-                  color: _primary,
+                  backgroundColor: primary.withValues(alpha: 0.15),
+                  color: primary,
                 ),
               ),
             ],
@@ -699,13 +709,9 @@ class _CozyTimerCardState extends State<_CozyTimerCard>
 class _CalendarFeedCard extends StatelessWidget {
   const _CalendarFeedCard();
 
-  static const _cardBg = Color(0xFFFFF8EE);
-  static const _primary = Color(0xFFD4A574);
-  static const _accent = Color(0xFFC08552);
-  static const _textColor = Color(0xFF4A3728);
-
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     final now = DateTime.now();
     final monthName = DateFormat('MMMM').format(now);
     final dayName = DateFormat('EEE').format(now);
@@ -714,11 +720,11 @@ class _CalendarFeedCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: c.feedCardBgAlt,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: _primary.withValues(alpha: 0.15),
+            color: c.primary.withValues(alpha: c.isDark ? 0.08 : 0.15),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -731,27 +737,27 @@ class _CalendarFeedCard extends StatelessWidget {
             children: [
               const Text('📅', style: TextStyle(fontSize: 22)),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Aesthetic Calendar',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: _textColor,
+                  color: c.textPrimary,
                 ),
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _primary.withValues(alpha: 0.15),
+                  color: c.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
+                child: Text(
                   'Planner',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _accent,
+                    color: c.accent,
                   ),
                 ),
               ),
@@ -762,15 +768,14 @@ class _CalendarFeedCard extends StatelessWidget {
           // Mini calendar preview
           Row(
             children: [
-              // Date circle
               Container(
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _primary.withValues(alpha: 0.12),
+                  color: c.primary.withValues(alpha: 0.12),
                   border: Border.all(
-                    color: _primary.withValues(alpha: 0.25),
+                    color: c.primary.withValues(alpha: 0.25),
                     width: 1.5,
                   ),
                 ),
@@ -779,10 +784,10 @@ class _CalendarFeedCard extends StatelessWidget {
                   children: [
                     Text(
                       '${now.day}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: _accent,
+                        color: c.accent,
                       ),
                     ),
                     Text(
@@ -790,7 +795,7 @@ class _CalendarFeedCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        color: _textColor.withValues(alpha: 0.5),
+                        color: c.textPrimary.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -798,18 +803,17 @@ class _CalendarFeedCard extends StatelessWidget {
               ),
               const SizedBox(width: 16),
 
-              // Right side info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '$monthName ${now.year}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w300,
-                        color: _textColor,
+                        color: c.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -817,7 +821,7 @@ class _CalendarFeedCard extends StatelessWidget {
                       'Tap card to expand →',
                       style: TextStyle(
                         fontSize: 12,
-                        color: _accent.withValues(alpha: 0.7),
+                        color: c.accent.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -829,7 +833,6 @@ class _CalendarFeedCard extends StatelessWidget {
 
           const SizedBox(height: 14),
 
-          // Mini week dots
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(7, (i) {
@@ -840,8 +843,8 @@ class _CalendarFeedCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isToday
-                      ? _primary
-                      : _primary.withValues(alpha: 0.08),
+                      ? c.primary
+                      : c.primary.withValues(alpha: 0.08),
                 ),
                 child: Center(
                   child: Text(
@@ -851,7 +854,7 @@ class _CalendarFeedCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: isToday
                           ? Colors.white
-                          : _textColor.withValues(alpha: 0.45),
+                          : c.textPrimary.withValues(alpha: 0.45),
                     ),
                   ),
                 ),
@@ -869,22 +872,18 @@ class _CalendarFeedCard extends StatelessWidget {
 class _NotepadFeedCard extends StatelessWidget {
   const _NotepadFeedCard();
 
-  static const _cardBg = Color(0xFFFFF8EE);
-  static const _primary = Color(0xFFD4A574);
-  static const _accent = Color(0xFFC08552);
-  static const _textColor = Color(0xFF4A3728);
-
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: c.feedCardBgAlt,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: _primary.withValues(alpha: 0.15),
+            color: c.primary.withValues(alpha: c.isDark ? 0.08 : 0.15),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -893,32 +892,31 @@ class _NotepadFeedCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
           Row(
             children: [
               const Text('📝', style: TextStyle(fontSize: 22)),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Personal Notepad',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: _textColor,
+                  color: c.textPrimary,
                 ),
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _primary.withValues(alpha: 0.15),
+                  color: c.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
+                child: Text(
                   'Notes',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _accent,
+                    color: c.accent,
                   ),
                 ),
               ),
@@ -926,7 +924,6 @@ class _NotepadFeedCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Mini preview lines (ruled paper feel)
           ...List.generate(3, (i) {
             final texts = ['Buy groceries 🛒', 'Finish assignment', 'Call mom ☎️'];
             final dones = [false, true, false];
@@ -941,17 +938,17 @@ class _NotepadFeedCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(5),
                       border: Border.all(
                         color: dones[i]
-                            ? _primary
-                            : _primary.withValues(alpha: 0.3),
+                            ? c.primary
+                            : c.primary.withValues(alpha: 0.3),
                         width: 1.5,
                       ),
                       color: dones[i]
-                          ? _primary.withValues(alpha: 0.12)
+                          ? c.primary.withValues(alpha: 0.12)
                           : Colors.transparent,
                     ),
                     child: dones[i]
-                        ? const Icon(Icons.check_rounded,
-                            size: 13, color: _accent)
+                        ? Icon(Icons.check_rounded,
+                            size: 13, color: c.accent)
                         : null,
                   ),
                   const SizedBox(width: 10),
@@ -962,13 +959,13 @@ class _NotepadFeedCard extends StatelessWidget {
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: dones[i]
-                            ? _textColor.withValues(alpha: 0.35)
-                            : _textColor,
+                            ? c.textPrimary.withValues(alpha: 0.35)
+                            : c.textPrimary,
                         decoration: dones[i]
                             ? TextDecoration.lineThrough
                             : null,
                         decorationColor:
-                            _textColor.withValues(alpha: 0.3),
+                            c.textPrimary.withValues(alpha: 0.3),
                       ),
                     ),
                   ),
@@ -979,14 +976,13 @@ class _NotepadFeedCard extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // Bottom hint
           Align(
             alignment: Alignment.centerRight,
             child: Text(
               'Tap card to expand →',
               style: TextStyle(
                 fontSize: 12,
-                color: _accent.withValues(alpha: 0.7),
+                color: c.accent.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -1002,22 +998,18 @@ class _NotepadFeedCard extends StatelessWidget {
 class _QuoteFeedCard extends StatelessWidget {
   const _QuoteFeedCard();
 
-  static const _cardBg = Color(0xFFFFF8EE);
-  static const _primary = Color(0xFFD4A574);
-  static const _accent = Color(0xFFC08552);
-  static const _textColor = Color(0xFF4A3728);
-
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: c.feedCardBgAlt,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: _primary.withValues(alpha: 0.15),
+            color: c.primary.withValues(alpha: c.isDark ? 0.08 : 0.15),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -1026,32 +1018,31 @@ class _QuoteFeedCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header row
           Row(
             children: [
               const Text('💬', style: TextStyle(fontSize: 22)),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Daily Quote',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: _textColor,
+                  color: c.textPrimary,
                 ),
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _primary.withValues(alpha: 0.15),
+                  color: c.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
+                child: Text(
                   'Inspire',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _accent,
+                    color: c.accent,
                   ),
                 ),
               ),
@@ -1059,15 +1050,16 @@ class _QuoteFeedCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Featured quote
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: c.isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.white.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: _primary.withValues(alpha: 0.08),
+                color: c.primary.withValues(alpha: 0.08),
               ),
             ),
             child: Column(
@@ -1078,18 +1070,18 @@ class _QuoteFeedCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.w900,
-                    color: _primary.withValues(alpha: 0.25),
+                    color: c.primary.withValues(alpha: 0.25),
                     height: 0.6,
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Small steps every day lead to big changes.',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                     fontStyle: FontStyle.italic,
-                    color: _textColor,
+                    color: c.textPrimary,
                     height: 1.5,
                   ),
                 ),
@@ -1101,7 +1093,7 @@ class _QuoteFeedCard extends StatelessWidget {
                       '— Unknown',
                       style: TextStyle(
                         fontSize: 12,
-                        color: _accent.withValues(alpha: 0.7),
+                        color: c.accent.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -1109,7 +1101,7 @@ class _QuoteFeedCard extends StatelessWidget {
                       'Tap card to expand →',
                       style: TextStyle(
                         fontSize: 12,
-                        color: _accent.withValues(alpha: 0.7),
+                        color: c.accent.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -1173,22 +1165,21 @@ class _MiniRingPainter extends CustomPainter {
 class _HabitFeedCard extends StatelessWidget {
   const _HabitFeedCard();
 
-  static const _cardBg = Color(0xFFFFF8EE);
-  static const _primary = Color(0xFF7B61FF);
-  static const _accent = Color(0xFF6B4FE0);
-  static const _textColor = Color(0xFF4A3728);
-
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    const habitPrimary = Color(0xFF7B61FF);
+    const habitAccent = Color(0xFF6B4FE0);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _cardBg,
+        color: c.feedCardBgAlt,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: _primary.withValues(alpha: 0.12),
+            color: habitPrimary.withValues(alpha: c.isDark ? 0.08 : 0.12),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -1197,17 +1188,16 @@ class _HabitFeedCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
           Row(
             children: [
               const Text('🎯', style: TextStyle(fontSize: 22)),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Habit Tracker',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: _textColor,
+                  color: c.textPrimary,
                 ),
               ),
               const Spacer(),
@@ -1215,7 +1205,7 @@ class _HabitFeedCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _primary.withValues(alpha: 0.12),
+                  color: habitPrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Text(
@@ -1223,7 +1213,7 @@ class _HabitFeedCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _accent,
+                    color: habitAccent,
                   ),
                 ),
               ),
@@ -1231,21 +1221,21 @@ class _HabitFeedCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Mini heatmap preview (5x7 dots)
           Center(
             child: Wrap(
               spacing: 4,
               runSpacing: 4,
               children: List.generate(35, (i) {
-                // Create a pattern that looks like scattered completions
                 final filled = [0,1,3,5,7,8,10,14,15,17,19,21,22,24,25,28,29,30,32,34].contains(i);
                 return Container(
                   width: 14,
                   height: 14,
                   decoration: BoxDecoration(
                     color: filled
-                        ? _primary.withValues(alpha: 0.2 + (i % 5) * 0.18)
-                        : const Color(0xFFEDE5D8),
+                        ? habitPrimary.withValues(alpha: 0.2 + (i % 5) * 0.18)
+                        : c.isDark
+                            ? const Color(0xFF2A2520)
+                            : const Color(0xFFEDE5D8),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 );
@@ -1254,15 +1244,14 @@ class _HabitFeedCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Quick stats
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _QuickStat(label: 'Habits', value: '4', color: _primary),
-              _QuickStat(
-                  label: 'Streak', value: '7 🔥', color: const Color(0xFFFF7043)),
-              _QuickStat(
-                  label: 'Today', value: '2/4', color: const Color(0xFF69F0AE)),
+              _QuickStat(label: 'Habits', value: '4', color: habitPrimary),
+              const _QuickStat(
+                  label: 'Streak', value: '7 🔥', color: Color(0xFFFF7043)),
+              const _QuickStat(
+                  label: 'Today', value: '2/4', color: Color(0xFF69F0AE)),
             ],
           ),
 
@@ -1273,7 +1262,7 @@ class _HabitFeedCard extends StatelessWidget {
               'Tap card to expand →',
               style: TextStyle(
                 fontSize: 12,
-                color: _accent.withValues(alpha: 0.7),
+                color: habitAccent.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -1297,6 +1286,7 @@ class _QuickStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Column(
       children: [
         Text(
@@ -1310,9 +1300,9 @@ class _QuickStat extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
-            color: Color(0xFF8C776A),
+            color: c.textSecondary,
           ),
         ),
       ],

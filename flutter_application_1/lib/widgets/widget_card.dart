@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/widget_item.dart';
+import '../utils/theme_provider.dart';
 
 /// ─── Figma-style Widget Discovery Card ───
 /// Shows a preview image with rating badge, heart/save icon,
@@ -57,6 +58,7 @@ class _WidgetCardState extends State<WidgetCard>
   @override
   Widget build(BuildContext context) {
     final w = widget.item;
+    final c = ThemeProvider.colorsOf(context);
     return GestureDetector(
       onTapDown: (_) => _hoverCtrl.forward(),
       onTapUp: (_) {
@@ -72,11 +74,11 @@ class _WidgetCardState extends State<WidgetCard>
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: c.cardBg,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
+                color: c.shadow.withValues(alpha: 0.06),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -110,11 +112,11 @@ class _WidgetCardState extends State<WidgetCard>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.92),
+                          color: c.cardBg.withValues(alpha: 0.92),
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
+                              color: c.shadow.withValues(alpha: 0.08),
                               blurRadius: 6,
                             ),
                           ],
@@ -127,10 +129,10 @@ class _WidgetCardState extends State<WidgetCard>
                             const SizedBox(width: 3),
                             Text(
                               w.rating.toString(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: Color(0xFF3B2B22),
+                                color: c.textPrimary,
                               ),
                             ),
                           ],
@@ -149,11 +151,11 @@ class _WidgetCardState extends State<WidgetCard>
                           decoration: BoxDecoration(
                             color: _saved
                                 ? const Color(0xFFFF6B6B)
-                                : Colors.white.withValues(alpha: 0.92),
+                                : c.cardBg.withValues(alpha: 0.92),
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
+                                color: c.shadow.withValues(alpha: 0.08),
                                 blurRadius: 6,
                               ),
                             ],
@@ -165,7 +167,7 @@ class _WidgetCardState extends State<WidgetCard>
                             size: 18,
                             color: _saved
                                 ? Colors.white
-                                : const Color(0xFF8C776A),
+                                : c.textSecondary,
                           ),
                         ),
                       ),
@@ -183,10 +185,10 @@ class _WidgetCardState extends State<WidgetCard>
                     // Title
                     Text(
                       w.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF3B2B22),
+                        color: c.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -207,9 +209,9 @@ class _WidgetCardState extends State<WidgetCard>
                         Expanded(
                           child: Text(
                             w.creator,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF8C776A),
+                              color: c.textSecondary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -223,13 +225,13 @@ class _WidgetCardState extends State<WidgetCard>
                       children: [
                         Icon(Icons.download_outlined,
                             size: 14,
-                            color: const Color(0xFF8C776A).withValues(alpha: 0.7)),
+                            color: c.textSecondary.withValues(alpha: 0.7)),
                         const SizedBox(width: 3),
                         Text(
                           w.downloads,
                           style: TextStyle(
                             fontSize: 11,
-                            color: const Color(0xFF8C776A).withValues(alpha: 0.7),
+                            color: c.textSecondary.withValues(alpha: 0.7),
                           ),
                         ),
                         const Spacer(),
@@ -242,8 +244,8 @@ class _WidgetCardState extends State<WidgetCard>
                             margin: const EdgeInsets.only(left: 4),
                             decoration: BoxDecoration(
                               color: i == 0
-                                  ? const Color(0xFFD4A574)
-                                  : const Color(0xFFD4A574).withValues(alpha: 0.3),
+                                  ? c.primary
+                                  : c.primary.withValues(alpha: 0.3),
                               shape: BoxShape.circle,
                             ),
                           ),

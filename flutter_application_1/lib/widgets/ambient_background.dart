@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:widgetopia/utils/theme_provider.dart';
 
 class AmbientBackground extends StatelessWidget {
   final Widget child;
@@ -8,28 +9,28 @@ class AmbientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+
     return Stack(
       children: [
         // Base background
-        Container(
-          color: const Color(0xFFFFF8EE),
-        ),
+        Container(color: c.surfaceBg),
 
         // Glow blobs
         Positioned(
           top: -100,
           left: -80,
-          child: _Glow(color: const Color(0xFFFFD6A5), size: 260),
+          child: _Glow(color: c.glowA, size: 260),
         ),
         Positioned(
           top: 200,
           right: -100,
-          child: _Glow(color: const Color(0xFFFFB4A2), size: 240),
+          child: _Glow(color: c.glowB, size: 240),
         ),
         Positioned(
           bottom: -120,
           left: -60,
-          child: _Glow(color: const Color(0xFFFFE5EC), size: 280),
+          child: _Glow(color: c.glowC, size: 280),
         ),
 
         // Blur layer

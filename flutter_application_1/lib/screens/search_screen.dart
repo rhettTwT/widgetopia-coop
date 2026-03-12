@@ -9,6 +9,7 @@ import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
 import 'package:widgetopia/screens/notepad_detail_screen.dart';
+import 'package:widgetopia/utils/theme_provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -21,11 +22,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
   final _focusNode = FocusNode();
   String _query = "";
-
-  static const _bg = Color(0xFFFFF8EE);
-  static const _textColor = Color(0xFF4A3728);
-  static const _hintColor = Color(0xFFB0A090);
-  static const _accent = Color(0xFF6B4F3A);
 
   // Recent/popular search suggestions
   final _suggestions = [
@@ -130,6 +126,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     final hasQuery = _query.isNotEmpty;
     final results = _results;
 
@@ -137,7 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Container(color: _bg),
+          Container(color: c.surfaceBg),
           // Glow blobs
           Positioned(
             top: -60,
@@ -147,7 +144,7 @@ class _SearchScreenState extends State<SearchScreen> {
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFFD6A5).withValues(alpha: 0.45),
+                color: c.glowA,
               ),
             ),
           ),
@@ -159,7 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
               height: 240,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFFE5EC).withValues(alpha: 0.45),
+                color: c.glowC,
               ),
             ),
           ),
@@ -181,7 +178,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: _textColor,
+                      color: c.textPrimary,
                     ),
                   ),
                 ),
@@ -192,11 +189,13 @@ class _SearchScreenState extends State<SearchScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: c.isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.white.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: Colors.black.withValues(alpha: c.isDark ? 0.15 : 0.05),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -206,19 +205,19 @@ class _SearchScreenState extends State<SearchScreen> {
                       controller: _controller,
                       focusNode: _focusNode,
                       onChanged: _search,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
-                        color: _textColor,
+                        color: c.textPrimary,
                       ),
                       decoration: InputDecoration(
                         hintText: "Search widgets, packs, creators...",
                         hintStyle: TextStyle(
-                          color: _hintColor,
+                          color: c.textMuted,
                           fontSize: 15,
                         ),
-                        prefixIcon: const Icon(
+                        prefixIcon: Icon(
                           Icons.search_rounded,
-                          color: _hintColor,
+                          color: c.textMuted,
                           size: 22,
                         ),
                         suffixIcon: hasQuery
@@ -227,9 +226,9 @@ class _SearchScreenState extends State<SearchScreen> {
                                   _controller.clear();
                                   _search("");
                                 },
-                                child: const Icon(
+                                child: Icon(
                                   Icons.close_rounded,
-                                  color: _hintColor,
+                                  color: c.textMuted,
                                   size: 20,
                                 ),
                               )
@@ -248,8 +247,8 @@ class _SearchScreenState extends State<SearchScreen> {
                 // ─── Results or Browse Content ───
                 Expanded(
                   child: hasQuery
-                      ? _buildResults(results)
-                      : _buildBrowse(),
+                      ? _buildResults(results, c)
+                      : _buildBrowse(c),
                 ),
               ],
             ),
@@ -260,7 +259,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // ─── Search Results ───
-  Widget _buildResults(List<WidgetItem> results) {
+  Widget _buildResults(List<WidgetItem> results, AppColors c) {
     if (results.isEmpty) {
       return Center(
         child: Column(
@@ -269,7 +268,7 @@ class _SearchScreenState extends State<SearchScreen> {
             Icon(
               Icons.search_off_rounded,
               size: 64,
-              color: _hintColor.withValues(alpha: 0.4),
+              color: c.textMuted.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
             Text(
@@ -277,7 +276,7 @@ class _SearchScreenState extends State<SearchScreen> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: _hintColor,
+                color: c.textMuted,
               ),
             ),
             const SizedBox(height: 8),
@@ -285,7 +284,7 @@ class _SearchScreenState extends State<SearchScreen> {
               "Try a different search term",
               style: TextStyle(
                 fontSize: 14,
-                color: _hintColor.withValues(alpha: 0.7),
+                color: c.textMuted.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -313,17 +312,17 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // ─── Browse (when no query) ───
-  Widget _buildBrowse() {
+  Widget _buildBrowse(AppColors c) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
       children: [
         // Categories
-        const Text(
+        Text(
           "Browse Categories",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: _textColor,
+            color: c.textPrimary,
           ),
         ),
         const SizedBox(height: 14),
@@ -339,10 +338,10 @@ class _SearchScreenState extends State<SearchScreen> {
               onTap: () => _searchTag(cat.label),
               child: Container(
                 decoration: BoxDecoration(
-                  color: cat.color.withValues(alpha: 0.08),
+                  color: cat.color.withValues(alpha: c.isDark ? 0.12 : 0.08),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: cat.color.withValues(alpha: 0.15),
+                    color: cat.color.withValues(alpha: c.isDark ? 0.2 : 0.15),
                     width: 1,
                   ),
                 ),
@@ -369,12 +368,12 @@ class _SearchScreenState extends State<SearchScreen> {
         const SizedBox(height: 28),
 
         // Popular searches
-        const Text(
+        Text(
           "Popular Searches",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: _textColor,
+            color: c.textPrimary,
           ),
         ),
         const SizedBox(height: 14),
@@ -390,11 +389,13 @@ class _SearchScreenState extends State<SearchScreen> {
                   vertical: 10,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.75),
+                  color: c.isDark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : Colors.white.withValues(alpha: 0.75),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
+                      color: Colors.black.withValues(alpha: c.isDark ? 0.1 : 0.03),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -406,15 +407,15 @@ class _SearchScreenState extends State<SearchScreen> {
                     Icon(
                       Icons.trending_up_rounded,
                       size: 16,
-                      color: _accent.withValues(alpha: 0.5),
+                      color: c.accent.withValues(alpha: 0.5),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       s,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: _textColor,
+                        color: c.textPrimary,
                       ),
                     ),
                   ],
@@ -427,12 +428,12 @@ class _SearchScreenState extends State<SearchScreen> {
         const SizedBox(height: 28),
 
         // All widgets preview
-        const Text(
+        Text(
           "All Widgets",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: _textColor,
+            color: c.textPrimary,
           ),
         ),
         const SizedBox(height: 14),

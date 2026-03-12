@@ -7,6 +7,7 @@ import 'package:widgetopia/widgets/notepad_widget_preview.dart';
 import 'package:widgetopia/widgets/habit_widget_preview.dart';
 import 'package:widgetopia/screens/widget_detail_screen.dart';
 import 'package:widgetopia/screens/habit_tracker_screen.dart';
+import 'package:widgetopia/utils/theme_provider.dart';
 
 class SavedScreen extends StatefulWidget {
   const SavedScreen({super.key});
@@ -42,15 +43,16 @@ class _SavedScreenState extends State<SavedScreen> {
       case "habit":
         return const HabitWidgetPreview(interactive: true);
       default:
+        final c = ThemeProvider.colorsOf(context);
         return Container(
           height: 120,
           decoration: BoxDecoration(
-            color: const Color(0xFFF1E8DD),
+            color: c.chipBg,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Center(
+          child: Center(
             child: Text("Widget Preview",
-                style: TextStyle(color: Color(0xFF8C776A))),
+                style: TextStyle(color: c.textSecondary)),
           ),
         );
     }
@@ -83,15 +85,17 @@ class _SavedScreenState extends State<SavedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8EE),
+      backgroundColor: c.surfaceBg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
+        title: Text(
           "Saved Widgets",
           style: TextStyle(
-            color: Color(0xFF4A3B2A),
+            color: c.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -101,8 +105,8 @@ class _SavedScreenState extends State<SavedScreen> {
         future: _savedWidgets,
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFD4A574)),
+            return Center(
+              child: CircularProgressIndicator(color: c.primary),
             );
           }
 
@@ -115,14 +119,14 @@ class _SavedScreenState extends State<SavedScreen> {
                 children: [
                   Icon(Icons.widgets_outlined,
                       size: 64,
-                      color: const Color(0xFF8C776A).withValues(alpha: 0.4)),
+                      color: c.textSecondary.withValues(alpha: 0.4)),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     "No saved widgets yet",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8C776A),
+                      color: c.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -130,7 +134,7 @@ class _SavedScreenState extends State<SavedScreen> {
                     "Save widgets from the explore page\nto see them here",
                     style: TextStyle(
                       fontSize: 14,
-                      color: const Color(0xFF8C776A).withValues(alpha: 0.7),
+                      color: c.textSecondary.withValues(alpha: 0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -192,15 +196,15 @@ class _SavedScreenState extends State<SavedScreen> {
                             Expanded(
                               child: Text(
                                 item.title,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF4A3728),
+                                  color: c.textPrimary,
                                 ),
                               ),
                             ),
                             Icon(Icons.chevron_right,
-                                color: const Color(0xFF8C776A)
+                                color: c.textSecondary
                                     .withValues(alpha: 0.5),
                                 size: 20),
                           ],
@@ -219,9 +223,10 @@ class _SavedScreenState extends State<SavedScreen> {
   }
 
   Color _typeColor(String type) {
+    final c = ThemeProvider.colorsOf(context);
     switch (type) {
       case "pomodoro":
-        return const Color(0xFFD4A574);
+        return c.primary;
       case "quote":
         return const Color(0xFFFF6B6B);
       case "calendar":
@@ -231,7 +236,7 @@ class _SavedScreenState extends State<SavedScreen> {
       case "habit":
         return const Color(0xFF7B61FF);
       default:
-        return const Color(0xFF8C776A);
+        return c.textSecondary;
     }
   }
 }

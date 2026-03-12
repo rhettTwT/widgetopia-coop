@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:widgetopia/utils/theme_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,21 +11,17 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _notificationsEnabled = true;
-  bool _darkModeEnabled = false;
-
-  static const _bg = Color(0xFFFFF8EE);
-  static const _textColor = Color(0xFF4A3728);
-  static const _secondaryText = Color(0xFF8C776A);
-  static const _accent = Color(0xFF6B4F3A);
-  static const _cardColor = Color(0xFFFFFFFF);
 
   @override
   Widget build(BuildContext context) {
+    final theme = ThemeProvider.of(context);
+    final c = theme.colors;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          Container(color: _bg),
+          Container(color: c.surfaceBg),
           Positioned(
             top: -80,
             right: -60,
@@ -33,7 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFFD6A5).withValues(alpha: 0.45),
+                color: c.glowA,
               ),
             ),
           ),
@@ -45,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 260,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFFFFE5EC).withValues(alpha: 0.45),
+                color: c.glowC,
               ),
             ),
           ),
@@ -59,12 +56,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
               children: [
                 // ─── Header ───
-                const Text(
+                Text(
                   "Profile",
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: _textColor,
+                    color: c.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -73,11 +70,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: _cardColor,
+                    color: c.cardBg,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: Colors.black.withValues(alpha: c.isDark ? 0.15 : 0.05),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -121,12 +118,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "Souvik",
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: _textColor,
+                                color: c.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -134,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               "Widget enthusiast ✨",
                               style: TextStyle(
                                 fontSize: 14,
-                                color: _secondaryText,
+                                color: c.textSecondary,
                               ),
                             ),
                           ],
@@ -144,12 +141,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: _accent.withValues(alpha: 0.08),
+                          color: c.accent.withValues(alpha: 0.08),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.edit_rounded,
-                          color: _accent,
+                          color: c.accent,
                           size: 20,
                         ),
                       ),
@@ -186,12 +183,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 28),
 
                 // ─── Settings Section ───
-                const Text(
+                Text(
                   "Settings",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: _textColor,
+                    color: c.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -206,7 +203,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         value: _notificationsEnabled,
                         onChanged: (v) =>
                             setState(() => _notificationsEnabled = v),
-                        activeTrackColor: _accent,
+                        activeTrackColor: c.accent,
                       ),
                     ),
                     _SettingsTile(
@@ -214,10 +211,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       iconColor: const Color(0xFF7B61FF),
                       title: "Dark Mode",
                       trailing: Switch.adaptive(
-                        value: _darkModeEnabled,
-                        onChanged: (v) =>
-                            setState(() => _darkModeEnabled = v),
-                        activeTrackColor: _accent,
+                        value: theme.isDark,
+                        onChanged: (v) => theme.setDark(v),
+                        activeTrackColor: c.accent,
                       ),
                     ),
                     _SettingsTile(
@@ -318,15 +314,16 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: c.cardBg,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withValues(alpha: c.isDark ? 0.15 : 0.04),
               blurRadius: 14,
               offset: const Offset(0, 6),
             ),
@@ -347,9 +344,9 @@ class _StatCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFF8C776A),
+                color: c.textSecondary,
               ),
             ),
           ],
@@ -366,13 +363,14 @@ class _SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: c.cardBg,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: c.isDark ? 0.15 : 0.04),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -387,7 +385,7 @@ class _SettingsGroup extends StatelessWidget {
                 Divider(
                   height: 1,
                   indent: 56,
-                  color: const Color(0xFFE8DFD2).withValues(alpha: 0.6),
+                  color: c.divider,
                 ),
             ],
           );
@@ -417,6 +415,7 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -440,19 +439,19 @@ class _SettingsTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF4A3728),
+                      color: c.textPrimary,
                     ),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
                     Text(
                       subtitle!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF8C776A),
+                        color: c.textSecondary,
                       ),
                     ),
                   ],
@@ -462,7 +461,7 @@ class _SettingsTile extends StatelessWidget {
             trailing ??
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: const Color(0xFF8C776A).withValues(alpha: 0.5),
+                  color: c.textSecondary.withValues(alpha: 0.5),
                   size: 22,
                 ),
           ],
