@@ -4,6 +4,7 @@ import '../services/saved_widgets_service.dart';
 import '../widgets/quote_widget_preview.dart';
 import '../widgets/pomodoro_widget_preview.dart';
 import '../widgets/notepad_widget_preview.dart';
+import '../widgets/mood_widget_preview.dart';
 
 class HomeDashboardScreen extends StatefulWidget {
   const HomeDashboardScreen({super.key});
@@ -37,6 +38,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
         return const PomodoroWidgetPreview();
       case "notepad":
         return const NotepadWidgetPreview();
+      case "mood":
+        return const MoodWidgetPreview(interactive: true);
       default:
         return const SizedBox();
     }

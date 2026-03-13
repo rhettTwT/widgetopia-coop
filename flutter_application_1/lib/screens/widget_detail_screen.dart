@@ -3,6 +3,7 @@ import 'package:widgetopia/widgets/quote_widget_preview.dart';
 import 'package:widgetopia/widgets/pomodoro_widget_preview.dart';
 import 'package:widgetopia/widgets/notepad_widget_preview.dart';
 import 'package:widgetopia/widgets/habit_widget_preview.dart';
+import 'package:widgetopia/widgets/mood_widget_preview.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
 
@@ -31,6 +32,8 @@ class WidgetDetailScreen extends StatelessWidget {
         return const NotepadWidgetPreview(theme: '');
       case "habit":
         return const HabitWidgetPreview(interactive: true);
+      case "mood":
+        return const MoodWidgetPreview(interactive: true);
       default:
         return const SizedBox();
     }

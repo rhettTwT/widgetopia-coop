@@ -9,6 +9,7 @@ import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
 import 'package:widgetopia/screens/notepad_detail_screen.dart';
+import 'package:widgetopia/screens/mood_tracker_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -47,6 +48,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
         break;
       case "notepad":
         screen = const NotepadDetailScreen();
+        break;
+      case "mood":
+        screen = const MoodTrackerScreen();
         break;
       default:
         screen = WidgetDetailScreen(

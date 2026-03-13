@@ -9,6 +9,7 @@ import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
 import 'package:widgetopia/screens/notepad_detail_screen.dart';
+import 'package:widgetopia/screens/mood_tracker_screen.dart';
 import 'package:widgetopia/utils/theme_provider.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _SearchScreenState extends State<SearchScreen> {
     "Timer",
     "Calendar",
     "Habit",
+    "Mood",
     "Quote",
     "Notepad",
     "Cozy",
@@ -83,6 +85,9 @@ class _SearchScreenState extends State<SearchScreen> {
         break;
       case "notepad":
         screen = const NotepadDetailScreen();
+        break;
+      case "mood":
+        screen = const MoodTrackerScreen();
         break;
       default:
         screen = WidgetDetailScreen(

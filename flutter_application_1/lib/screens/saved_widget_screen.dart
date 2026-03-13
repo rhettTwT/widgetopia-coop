@@ -5,8 +5,10 @@ import 'package:widgetopia/widgets/quote_widget_preview.dart';
 import 'package:widgetopia/widgets/pomodoro_widget_preview.dart';
 import 'package:widgetopia/widgets/notepad_widget_preview.dart';
 import 'package:widgetopia/widgets/habit_widget_preview.dart';
+import 'package:widgetopia/widgets/mood_widget_preview.dart';
 import 'package:widgetopia/screens/widget_detail_screen.dart';
 import 'package:widgetopia/screens/habit_tracker_screen.dart';
+import 'package:widgetopia/screens/mood_tracker_screen.dart';
 import 'package:widgetopia/utils/theme_provider.dart';
 
 class SavedScreen extends StatefulWidget {
@@ -42,6 +44,8 @@ class _SavedScreenState extends State<SavedScreen> {
         return const NotepadWidgetPreview(theme: '');
       case "habit":
         return const HabitWidgetPreview(interactive: true);
+      case "mood":
+        return const MoodWidgetPreview(interactive: true);
       default:
         final c = ThemeProvider.colorsOf(context);
         return Container(
@@ -63,6 +67,11 @@ class _SavedScreenState extends State<SavedScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const HabitTrackerScreen()),
+      );
+    } else if (item.type == "mood") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MoodTrackerScreen()),
       );
     } else {
       Navigator.push(
@@ -235,6 +244,8 @@ class _SavedScreenState extends State<SavedScreen> {
         return const Color(0xFFFFB347);
       case "habit":
         return const Color(0xFF7B61FF);
+      case "mood":
+        return const Color(0xFFFF8FAB);
       default:
         return c.textSecondary;
     }

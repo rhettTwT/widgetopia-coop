@@ -293,6 +293,10 @@ class _WidgetPreviewThumb extends StatelessWidget {
         icon = Icons.check_circle_outline_rounded;
         color = const Color(0xFF7B61FF);
         break;
+      case "mood":
+        icon = Icons.mood_rounded;
+        color = const Color(0xFFFF8FAB);
+        break;
       default:
         icon = Icons.widgets_outlined;
         color = const Color(0xFF8C776A);

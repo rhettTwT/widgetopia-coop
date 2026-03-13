@@ -9,6 +9,7 @@ import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
 import 'package:widgetopia/screens/habit_tracker_screen.dart';
+import 'package:widgetopia/screens/mood_tracker_screen.dart';
 import 'package:widgetopia/utils/theme_provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -114,6 +115,12 @@ class HomeScreen extends StatelessWidget {
                 title: "Habit Tracker",
                 tag: "personal",
                 type: "habit",
+              ),
+
+              FeedCard(
+                title: "Mood Tracker",
+                tag: "wellbeing",
+                type: "mood",
               ),
             ],
           ),
@@ -373,6 +380,32 @@ class FeedCard extends StatelessWidget {
       return;
     }
 
+    if (type == "mood") {
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 500),
+          pageBuilder: (c, a, s) => const MoodTrackerScreen(),
+          transitionsBuilder: (c, animation, s, child) {
+            final curved = CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            );
+            return FadeTransition(
+              opacity: curved,
+              child: SlideTransition(
+                position: Tween(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: child,
+              ),
+            );
+          },
+        ),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 500),
@@ -435,6 +468,13 @@ class FeedCard extends StatelessWidget {
       return GestureDetector(
         onTap: () => _navigate(context),
         child: const _HabitFeedCard(),
+      );
+    }
+
+    if (type == "mood") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _MoodFeedCard(),
       );
     }
 
@@ -1263,6 +1303,165 @@ class _HabitFeedCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 color: habitAccent.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MoodFeedCard extends StatelessWidget {
+  const _MoodFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    const moodPrimary = Color(0xFFFF8FAB);
+    const moodAccent = Color(0xFFC95D7B);
+    const moodSequence = ['😞', '😕', '😌', '😊', '🤩'];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: c.feedCardBg,
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: moodPrimary.withValues(alpha: c.isDark ? 0.08 : 0.14),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text('💛', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 8),
+              Text(
+                'Mood Tracker',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: c.textPrimary,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: moodPrimary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Text(
+                  'Reflect',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: moodAccent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: moodPrimary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 58,
+                  height: 58,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: c.isDark ? 0.08 : 0.7),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Text('😊', style: TextStyle(fontSize: 28)),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Daily emotional check-in',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: c.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Log your mood, add notes, and notice trends.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: c.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(moodSequence.length, (index) {
+              return Container(
+                width: 42,
+                height: 42,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: index == 3
+                      ? moodPrimary.withValues(alpha: 0.18)
+                      : c.chipBg,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: index == 3
+                        ? moodPrimary.withValues(alpha: 0.5)
+                        : c.divider,
+                  ),
+                ),
+                child: Text(
+                  moodSequence[index],
+                  style: const TextStyle(fontSize: 20),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const [
+              _QuickStat(label: 'Logs', value: '12', color: moodPrimary),
+              _QuickStat(
+                  label: 'Streak', value: '5d', color: Color(0xFF4ECDC4)),
+              _QuickStat(
+                  label: 'Top mood', value: 'Good', color: Color(0xFFFFC75F)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'Tap card to expand →',
+              style: TextStyle(
+                fontSize: 12,
+                color: moodAccent.withValues(alpha: 0.72),
                 fontWeight: FontWeight.w500,
               ),
             ),
