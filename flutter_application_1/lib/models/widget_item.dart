@@ -6,12 +6,14 @@ class WidgetItem {
   final String subtitle;
   final String image;
   final String tag;
-  final String type; // quote, pomodoro, notepad, calendar, habit, generic
+  final String type; // quote, pomodoro, notepad, calendar, habit, mood, art_shuffle, exam_planner, sunrise_sunset, day_progress, agenda, weekly_agenda
   final String creator;
   final Color creatorColor;
   final double rating;
   final String downloads;
   final Color cardColor;
+  final String emoji;
+  final String category;
 
   WidgetItem({
     required this.id,
@@ -25,5 +27,7 @@ class WidgetItem {
     this.rating = 4.5,
     this.downloads = "1.0k",
     this.cardColor = const Color(0xFFFFFFFF),
+    this.emoji = "🧩",
+    this.category = "General",
   });
 }

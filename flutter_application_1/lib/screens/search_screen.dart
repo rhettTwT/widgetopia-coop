@@ -32,8 +32,10 @@ class _SearchScreenState extends State<SearchScreen> {
     "Mood",
     "Quote",
     "Notepad",
-    "Cozy",
-    "Minimal",
+    "Art",
+    "Sunrise",
+    "Agenda",
+    "Exams",
   ];
 
   // Category quick-access chips
@@ -44,6 +46,8 @@ class _SearchScreenState extends State<SearchScreen> {
     _Category("⏱️", "Timers", const Color(0xFFD4A574)),
     _Category("💬", "Quotes", const Color(0xFFFF6B6B)),
     _Category("📅", "Planners", const Color(0xFF4ECDC4)),
+    _Category("🌤️", "Nature", const Color(0xFFFF7043)),
+    _Category("📚", "School", const Color(0xFF42A5F5)),
   ];
 
   List<WidgetItem> get _results {

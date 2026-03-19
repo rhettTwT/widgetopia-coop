@@ -6,6 +6,8 @@ import 'package:widgetopia/widgets/habit_widget_preview.dart';
 import 'package:widgetopia/widgets/mood_widget_preview.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
+import 'package:widgetopia/data/widget_data.dart';
+import 'package:widgetopia/widgets/widget_card.dart';
 
 class WidgetDetailScreen extends StatelessWidget {
   final String title;
@@ -35,178 +37,423 @@ class WidgetDetailScreen extends StatelessWidget {
       case "mood":
         return const MoodWidgetPreview(interactive: true);
       default:
-        return const SizedBox();
+        return Container(
+          height: 180,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.black12),
+          ),
+          child: const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.widgets_outlined, color: Colors.black38, size: 48),
+                SizedBox(height: 16),
+                Text("Widget Preview", style: TextStyle(color: Colors.black54, fontSize: 16)),
+              ],
+            ),
+          ),
+        );
     }
+  }
+
+  Widget _buildMetric(String value, String label) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.black54,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStyleSquare(String label, Color color, {Color textColor = Colors.black87}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8EE),
+      backgroundColor: Colors.white,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
-            /// HEADER + HERO CARD
-            Stack(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  height: 280,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(28),
-                    color: Colors.black,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        blurRadius: 30,
-                        offset: const Offset(0, 16),
-                      ),
-                    ],
+            /// TOP NAVIGATION BAR
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: Container(
-                      color: const Color(0xFF1F2933),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  top: 28,
-                  left: 28,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ),
-                ),
-
-                Positioned(
-                  top: 28,
-                  right: 28,
-                  child: Row(
-                    children: const [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.share),
-                      ),
-                      SizedBox(width: 12),
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.favorite_border),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Positioned(
-                  bottom: 24,
-                  left: 32,
-                  right: 32,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Chip(
-                        label: Text(tag),
-                        backgroundColor: const Color(0xFFFFC857),
+                      IconButton(
+                        icon: const Icon(Icons.share_outlined, color: Colors.black87),
+                        onPressed: () {},
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        "Perfect for your home screen ✨",
-                        style: TextStyle(color: Colors.white70),
+                      IconButton(
+                        icon: const Icon(Icons.favorite_border, color: Colors.black87),
+                        onPressed: () {},
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
+            /// MAIN SCROLLABLE CONTENT
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                physics: const BouncingScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 12),
-
-                    /// PREVIEW CARD
-                    Center(child: _buildPreview()),
-
-                    const SizedBox(height: 28),
-
-                    /// ABOUT
-                    const Text(
-                      "About this widget",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    /// HERO IMAGE WITH FEATURED PILL
+                    Container(
+                      height: 240,
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFFFEDD5), Color(0xFFFED7AA)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFF97316).withValues(alpha: 0.15),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 16,
+                            left: 16,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF59E0B),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                "Featured",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Center(
+                            child: Icon(
+                              Icons.widgets_rounded,
+                              size: 80,
+                              color: Colors.white.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "This widget is designed to match your vibe and sit beautifully on your home screen. Customize it however you like.",
-                      style: TextStyle(color: Colors.black54),
+
+                    const SizedBox(height: 24),
+
+                    /// TITLE AND TAG
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.black87,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Text(
+                                "Perfect for calm aesthetic 🌸",
+                                style: TextStyle(
+                                  color: Colors.black54,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const Spacer(),
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: Colors.black87,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                tag,
+                                style: const TextStyle(
+                                  color: Colors.black87,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
 
-                    const SizedBox(height: 80),
+                    const SizedBox(height: 24),
+
+                    /// METRICS ROW
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildMetric("12.4k", "Downloads"),
+                          _buildMetric("8.2k", "Saves"),
+                          _buildMetric("4.9", "Rating"),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    /// STYLE VARIATIONS
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: const [
+                              Text(
+                                "Style Variations",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(Icons.tune, size: 18, color: Colors.black54),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 1.4,
+                            children: [
+                              _buildStyleSquare("Original", const Color(0xFFFFF7ED), textColor: const Color(0xFFEA580C)),
+                              _buildStyleSquare("Dark", const Color(0xFF1F2933), textColor: Colors.white),
+                              _buildStyleSquare("Pastel", const Color(0xFFFCE4EC), textColor: const Color(0xFFD81B60)),
+                              _buildStyleSquare("Neon", const Color(0xFFF0FDF4), textColor: const Color(0xFF16A34A)),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    /// PREVIEW SECTION
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Preview",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Center(child: _buildPreview()),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    /// ABOUT SECTION
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "About this widget",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            "This widget brings a perfect balance of functionality and aesthetics to your home screen. Customize it to match your vibe and make your phone truly yours.",
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.black54,
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    /// YOU MIGHT ALSO LIKE SECTION
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: const Text(
+                        "You might also like",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 180,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: 4, // Show 4 recommendations
+                        separatorBuilder: (context, index) => const SizedBox(width: 16),
+                        itemBuilder: (context, index) {
+                          // Pick a few items from widgetFeed (skipping the first few just for variety)
+                          final item = widgetFeed[(index + 3) % widgetFeed.length];
+                          return SizedBox(
+                            width: 140,
+                            child: WidgetCard(
+                              item: item,
+                              onTap: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => WidgetDetailScreen(
+                                      title: item.title,
+                                      tag: item.tag,
+                                      type: item.type,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 120), // Bottom padding for fixed button
                   ],
                 ),
               ),
             ),
-
-            /// FIXED BOTTOM BUTTON
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF8EE),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, -6),
-                  ),
-                ],
-              ),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 56),
-                  backgroundColor: const Color(0xFF6B4F3A),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                ),
-                onPressed: () async {
-                  final widget = SavedWidgetModel(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    type: type,
-                    title: title,
-                    config: {},
-                    createdAt: DateTime.now(),
-                  );
-
-                  await SavedWidgetsService.save(widget);
-
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Widget saved 💾")),
-                  );
-                },
-                icon: const Icon(Icons.download),
-                label: const Text("Add to Home Screen"),
-              ),
-            ),
           ],
+        ),
+      ),
+      bottomSheet: Container(
+        color: Colors.white,
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 56),
+            backgroundColor: const Color(0xFF111827), // Almost black
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          onPressed: () async {
+            final widget = SavedWidgetModel(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              type: type,
+              title: title,
+              config: {},
+              createdAt: DateTime.now(),
+            );
+
+            await SavedWidgetsService.save(widget);
+
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Widget saved 💾"),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+          icon: const Icon(Icons.add, size: 20),
+          label: const Text(
+            "Add to Home Screen",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );

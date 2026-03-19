@@ -1,16 +1,16 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:widgetopia/screens/widget_detail_screen.dart';
+import 'dart:math';
+import 'dart:async';
 import 'package:widgetopia/widgets/ambient_background.dart';
+import 'package:widgetopia/screens/mood_tracker_screen.dart';
+import 'package:widgetopia/screens/widget_detail_screen.dart';
 import 'package:widgetopia/screens/notepad_detail_screen.dart';
 import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
 import 'package:widgetopia/screens/habit_tracker_screen.dart';
-import 'package:widgetopia/screens/mood_tracker_screen.dart';
-import 'package:widgetopia/utils/theme_provider.dart';
+import '../utils/theme_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -18,109 +18,174 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ThemeProvider.colorsOf(context);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AmbientBackground(
         child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Discover",
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: c.textPrimary,
+          child: CustomScrollView(
+            slivers: [
+              // ─── Header ───
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Discover",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: c.textPrimary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.transparent, // clean look
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.search_rounded, color: c.textPrimary, size: 28),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ─── Filter Chips ───
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 0, 0),
+                  child: SizedBox(
+                    height: 38,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: const [
+                        _Chip(label: "For You", selected: true),
+                        _Chip(label: "Aesthetic"),
+                        _Chip(label: "Fandom"),
+                        _Chip(label: "Meme"),
+                      ],
                     ),
                   ),
-                  Icon(Icons.search, color: c.textPrimary),
-                ],
+                ),
               ),
-              const SizedBox(height: 16),
 
-              // Filter Chips
-              SizedBox(
-                height: 38,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
+              // ─── Section: Trending Collections ───
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.trending_up, size: 20, color: c.textSecondary),
+                          const SizedBox(width: 8),
+                          Text(
+                            "Trending Collections",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: c.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        "See all",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: c.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ─── Trending Collections Grid ───
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverGrid.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1.25,
                   children: const [
-                    _Chip(label: "For You", selected: true),
-                    _Chip(label: "Aesthetic"),
-                    _Chip(label: "Fandom"),
-                    _Chip(label: "Meme"),
-                    _Chip(label: "Minimal"),
+                    _CollectionCard(
+                      title: "Hatsune Miku Pack",
+                      count: "12 widgets",
+                      icon: Icons.mic,
+                      color: Color(0xFFE0F7FA), // Cyan
+                      iconColor: Color(0xFF00ACC1),
+                    ),
+                    _CollectionCard(
+                      title: "Cozy Study Vibes",
+                      count: "18 widgets",
+                      icon: Icons.coffee,
+                      color: Color(0xFFFFF3E0), // Light Orange
+                      iconColor: Color(0xFFD84315),
+                    ),
+                    _CollectionCard(
+                      title: "Dark Academia",
+                      count: "15 widgets",
+                      icon: Icons.menu_book,
+                      color: Color(0xFFF5F5F5), // Grey
+                      iconColor: Color(0xFF424242),
+                    ),
+                    _CollectionCard(
+                      title: "Soft Girl Aesthetic",
+                      count: "20 widgets",
+                      icon: Icons.local_florist,
+                      color: Color(0xFFFCE4EC), // Pink
+                      iconColor: Color(0xFFD81B60),
+                    ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
 
-              const _SectionHeader(title: "Trending Collections"),
-              const SizedBox(height: 12),
-
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.3,
-                children: const [
-                  CollectionCard(title: "Wu Pack", count: "12 widgets", color: Color(0xFFE6F4F1)),
-                  CollectionCard(title: "Shang Pack", count: "18 widgets", color: Color(0xFFF8EFE6)),
-                  CollectionCard(title: "Clan Pack", count: "15 widgets", color: Color(0xFFEDEBEA)),
-                  CollectionCard(title: "Cozy Pack", count: "20 widgets", color: Color(0xFFFDECEF)),
-                ],
+              // ─── Section: ✨ For You ───
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
+                  child: _SectionHeader(title: "✨ For You"),
+                ),
               ),
 
-              const SizedBox(height: 28),
-
-              const _SectionHeader(title: "Featured Today"),
-              const SizedBox(height: 12),
-              const FeaturedCard(),
-
-              const SizedBox(height: 28),
-
-              const _SectionHeader(title: "For You"),
-              const SizedBox(height: 12),
-
-              FeedCard(
-                title: "Cozy Study Timer",
-                tag: "cozy",
-                type: "pomodoro",
+              // ─── Main Feed Cards ───
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const FeedCard(title: "Cozy Study Timer", tag: "cozy", type: "pomodoro"),
+                    const FeedCard(title: "Daily Quote", tag: "quote", type: "quote"),
+                    const FeedCard(title: "Personal Notepad", tag: "notes", type: "notepad"),
+                    const FeedCard(title: "Aesthetic Calendar", tag: "minimal", type: "calendar"),
+                    const FeedCard(title: "Habit Tracker", tag: "personal", type: "habit"),
+                    const FeedCard(title: "Mood Tracker", tag: "wellbeing", type: "mood"),
+                  ]),
+                ),
               ),
 
-              FeedCard(
-                title: "Daily Quote",
-                tag: "quote",
-                type: "quote",
-              ),
 
-              FeedCard(
-                title: "Personal Notepad",
-                tag: "notes",
-                type: "notepad",
-              ),
 
-              FeedCard(
-                title: "Aesthetic Calendar",
-                tag: "minimal",
-                type: "calendar",
-              ),
-
-              FeedCard(
-                title: "Habit Tracker",
-                tag: "personal",
-                type: "habit",
-              ),
-
-              FeedCard(
-                title: "Mood Tracker",
-                tag: "wellbeing",
-                type: "mood",
+              // ─── New Widget Cards ───
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const FeedCard(title: "Day Progress", tag: "minimal", type: "day_progress"),
+                    const FeedCard(title: "Sunrise & Sunset", tag: "nature", type: "sunrise_sunset"),
+                    const FeedCard(title: "Art Shuffle", tag: "aesthetic", type: "art_shuffle"),
+                    const FeedCard(title: "Today's Agenda", tag: "planner", type: "agenda"),
+                    const FeedCard(title: "Weekly Agenda", tag: "planner", type: "weekly_agenda"),
+                    const FeedCard(title: "Exam Planner", tag: "study", type: "exam_planner"),
+                    const SizedBox(height: 80), // bottom padding for nav bar
+                  ]),
+                ),
               ),
             ],
           ),
@@ -131,6 +196,67 @@ class HomeScreen extends StatelessWidget {
 }
 
 // ---------------- UI PARTS ----------------
+
+class _CollectionCard extends StatelessWidget {
+  final String title;
+  final String count;
+  final IconData icon;
+  final Color color;
+  final Color iconColor;
+
+  const _CollectionCard({
+    required this.title,
+    required this.count,
+    required this.icon,
+    required this.color,
+    required this.iconColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: iconColor, size: 28),
+          const Spacer(),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+              height: 1.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            count,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _Chip extends StatelessWidget {
   final String label;
@@ -150,8 +276,9 @@ class _Chip extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: selected ? Colors.white : c.accent,
-          fontWeight: FontWeight.w500,
+          color: selected ? Colors.white : c.textSecondary,
+          fontWeight: FontWeight.w600,
+          fontSize: 13,
         ),
       ),
     );
@@ -165,82 +292,21 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = ThemeProvider.colorsOf(context);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: c.textPrimary)),
-        Text("See all", style: TextStyle(color: c.textMuted)),
-      ],
-    );
-  }
-}
-
-class CollectionCard extends StatelessWidget {
-  final String title;
-  final String count;
-  final Color color;
-  const CollectionCard({super.key, required this.title, required this.count, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = ThemeProvider.colorsOf(context);
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: c.collectionCard(color),
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: c.isDark ? 0.15 : 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Spacer(),
-          Text(title, style: TextStyle(fontWeight: FontWeight.w600, color: c.textPrimary)),
-          const SizedBox(height: 4),
-          Text(count, style: TextStyle(color: c.textMuted)),
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: c.sectionHeaderColor,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }
 }
 
-class FeaturedCard extends StatelessWidget {
-  const FeaturedCard({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final c = ThemeProvider.colorsOf(context);
-    return Container(
-      height: 230,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        gradient: LinearGradient(colors: c.isDark
-            ? [const Color(0xFF2A2218), const Color(0xFF1A1410)]
-            : [const Color(0xFF2F2F2F), const Color(0xFF1A1A1A)]),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 30, offset: const Offset(0, 16)),
-        ],
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Chip(label: Text("Featured"), backgroundColor: Color(0xFFFFC857)),
-          Spacer(),
-          Text("Cozy Study Timer", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-          SizedBox(height: 4),
-          Text("Perfect for calm study sessions ☕", style: TextStyle(color: Colors.white70)),
-        ],
-      ),
-    );
-  }
-}
 
 class FeedCard extends StatelessWidget {
   final String title;
@@ -475,6 +541,49 @@ class FeedCard extends StatelessWidget {
       return GestureDetector(
         onTap: () => _navigate(context),
         child: const _MoodFeedCard(),
+      );
+    }
+
+    // New Widgets
+    if (type == "day_progress") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _DayProgressFeedCard(),
+      );
+    }
+    
+    if (type == "sunrise_sunset") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _SunriseSunsetFeedCard(),
+      );
+    }
+
+    if (type == "art_shuffle") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _ArtShuffleFeedCard(),
+      );
+    }
+
+    if (type == "agenda") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _AgendaFeedCard(),
+      );
+    }
+    
+    if (type == "weekly_agenda") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _WeeklyAgendaFeedCard(),
+      );
+    }
+
+    if (type == "exam_planner") {
+      return GestureDetector(
+        onTap: () => _navigate(context),
+        child: const _ExamPlannerFeedCard(),
       );
     }
 
@@ -1508,3 +1617,430 @@ class _QuickStat extends StatelessWidget {
     );
   }
 }
+
+// ---------------- NEW WIDGETS ----------------
+
+class FeedCardWrapper extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  const FeedCardWrapper({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(20),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: c.feedCardBg,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: c.isDark ? 0.2 : 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+        border: Border.all(
+          color: c.isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+          width: 1.5,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: Padding(
+          padding: padding,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _DayProgressFeedCard extends StatelessWidget {
+  const _DayProgressFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final totalMinutes = 24 * 60;
+    final elapsedMinutes = now.difference(startOfDay).inMinutes;
+    final progress = elapsedMinutes / totalMinutes;
+
+    return FeedCardWrapper(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Day Progress", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: c.textPrimary)),
+              Icon(Icons.hourglass_bottom, color: const Color(0xFF26A69A), size: 20),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: CircularProgressIndicator(
+                  value: progress,
+                  strokeWidth: 10,
+                  backgroundColor: c.chipBg,
+                  color: const Color(0xFF26A69A),
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "${(progress * 100).toInt()}%",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: c.textPrimary),
+                  ),
+                  Text(
+                    "complete",
+                    style: TextStyle(fontSize: 11, color: c.textSecondary),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "You're halfway there! ☀️",
+            style: TextStyle(fontSize: 13, color: c.textSecondary, fontStyle: FontStyle.italic),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SunriseSunsetFeedCard extends StatelessWidget {
+  const _SunriseSunsetFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return FeedCardWrapper(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFFB74D), Color(0xFFFF8A65), Color(0xFFE57373)],
+          ),
+        ),
+        child: Column(
+          children: [
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Sunrise / Sunset", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+                Icon(Icons.wb_twilight, color: Colors.white, size: 20),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    const Icon(Icons.wb_sunny_outlined, color: Colors.white),
+                    const SizedBox(height: 8),
+                    const Text("6:14 AM", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text("Sunrise", style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
+                  ],
+                ),
+                const Icon(Icons.arrow_forward_rounded, color: Colors.white54),
+                Column(
+                  children: [
+                    const Icon(Icons.nights_stay_outlined, color: Colors.white),
+                    const SizedBox(height: 8),
+                    const Text("7:42 PM", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text("Sunset", style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ArtShuffleFeedCard extends StatelessWidget {
+  const _ArtShuffleFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return FeedCardWrapper(
+      padding: EdgeInsets.zero,
+      child: Stack(
+        children: [
+          Container(
+            height: 200,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/potato1.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Container(
+            height: 200,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.black.withValues(alpha: 0.1), Colors.black.withValues(alpha: 0.7)],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 20,
+            bottom: 20,
+            right: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("The Potato Field", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text("Vincent van Gogh", style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.shuffle_rounded, color: Colors.white, size: 20),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AgendaFeedCard extends StatelessWidget {
+  const _AgendaFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    return FeedCardWrapper(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Today's Agenda", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: c.textPrimary)),
+              Icon(Icons.check_circle_outline, color: const Color(0xFF5C6BC0), size: 20),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _AgendaItem(time: "09:00 AM", title: "Team Sync", color: const Color(0xFF5C6BC0), colors: c),
+          _AgendaItem(time: "12:30 PM", title: "Lunch with Sarah", color: const Color(0xFFFFB347), colors: c),
+          _AgendaItem(time: "03:00 PM", title: "Design Review", color: const Color(0xFF4ECDC4), colors: c),
+        ],
+      ),
+    );
+  }
+}
+
+class _AgendaItem extends StatelessWidget {
+  final String time;
+  final String title;
+  final Color color;
+  final AppColors colors;
+
+  const _AgendaItem({required this.time, required this.title, required this.color, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 24,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 70,
+            child: Text(time, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colors.textSecondary)),
+          ),
+          Expanded(
+            child: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colors.textPrimary)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeeklyAgendaFeedCard extends StatelessWidget {
+  const _WeeklyAgendaFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    return FeedCardWrapper(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Weekly Overview", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: c.textPrimary)),
+              Icon(Icons.date_range_rounded, color: const Color(0xFF66BB6A), size: 20),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _DayStrip(day: "M", intensity: 0.8, isToday: false, colors: c),
+              _DayStrip(day: "T", intensity: 0.4, isToday: false, colors: c),
+              _DayStrip(day: "W", intensity: 1.0, isToday: true, colors: c),
+              _DayStrip(day: "T", intensity: 0.6, isToday: false, colors: c),
+              _DayStrip(day: "F", intensity: 0.2, isToday: false, colors: c),
+              _DayStrip(day: "S", intensity: 0.0, isToday: false, colors: c),
+              _DayStrip(day: "S", intensity: 0.0, isToday: false, colors: c),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DayStrip extends StatelessWidget {
+  final String day;
+  final double intensity;
+  final bool isToday;
+  final AppColors colors;
+
+  const _DayStrip({required this.day, required this.intensity, required this.isToday, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 32,
+          height: 60,
+          decoration: BoxDecoration(
+            color: intensity > 0 ? const Color(0xFF66BB6A).withValues(alpha: intensity * 0.8 + 0.2) : colors.chipBg,
+            borderRadius: BorderRadius.circular(8),
+            border: isToday ? Border.all(color: const Color(0xFF66BB6A), width: 2) : null,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          day,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+            color: isToday ? colors.textPrimary : colors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ExamPlannerFeedCard extends StatelessWidget {
+  const _ExamPlannerFeedCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    return FeedCardWrapper(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Next Exams", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: c.textPrimary)),
+              Icon(Icons.school_rounded, color: const Color(0xFF42A5F5), size: 20),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _ExamItem(subject: "Mathematics", date: "Oct 24", daysLeft: 2, color: const Color(0xFFFF6B6B), colors: c),
+          const SizedBox(height: 12),
+          _ExamItem(subject: "Physics", date: "Oct 28", daysLeft: 6, color: const Color(0xFFFFB347), colors: c),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExamItem extends StatelessWidget {
+  final String subject;
+  final String date;
+  final int daysLeft;
+  final Color color;
+  final AppColors colors;
+
+  const _ExamItem({required this.subject, required this.date, required this.daysLeft, required this.color, required this.colors});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colors.chipBg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(subject, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: colors.textPrimary)),
+              const SizedBox(height: 2),
+              Text(date, style: TextStyle(fontSize: 12, color: colors.textSecondary)),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              "$daysLeft days",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

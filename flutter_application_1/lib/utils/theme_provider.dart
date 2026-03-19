@@ -46,6 +46,11 @@ class AppColors {
   Color get feedCardBg => isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFF0DC);
   Color get feedCardBgAlt => isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFF8EE);
 
+  // Header & toolbar
+  Color get headerBg => isDark ? const Color(0xFF1A1612) : const Color(0xFFFFF4D6);
+  Color get quickAccessBg => isDark ? const Color(0xFF2A2420) : Colors.white;
+  Color get sectionHeaderColor => isDark ? const Color(0xFFBFA98A) : const Color(0xFF8C6E54);
+
   // Collection card overlay
   Color collectionCard(Color base) =>
       isDark ? Color.lerp(base, Colors.black, 0.6)! : base;

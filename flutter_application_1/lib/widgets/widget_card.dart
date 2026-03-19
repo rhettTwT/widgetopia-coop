@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/widget_item.dart';
 import '../utils/theme_provider.dart';
+import 'widget_customization_sheet.dart';
 
 /// ─── Figma-style Widget Discovery Card ───
 /// Shows a preview image with rating badge, heart/save icon,
@@ -104,72 +105,69 @@ class _WidgetCardState extends State<WidgetCard>
                         child: _WidgetPreviewThumb(type: w.type),
                       ),
                     ),
-                    // Rating badge (bottom left)
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: c.cardBg.withValues(alpha: 0.92),
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: c.shadow.withValues(alpha: 0.08),
-                              blurRadius: 6,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.star_rounded,
-                                color: Color(0xFFFFBF00), size: 14),
-                            const SizedBox(width: 3),
-                            Text(
-                              w.rating.toString(),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: c.textPrimary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    // Save/heart button (top right)
+                  // Save/heart button (top right)
                     Positioned(
                       top: 8,
                       right: 8,
-                      child: GestureDetector(
-                        onTap: _toggleSave,
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: _saved
-                                ? const Color(0xFFFF6B6B)
-                                : c.cardBg.withValues(alpha: 0.92),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: c.shadow.withValues(alpha: 0.08),
-                                blurRadius: 6,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              WidgetCustomizationSheet.show(
+                                context,
+                                widgetId: w.id,
+                                widgetTitle: w.title,
+                                widgetType: w.type,
+                                accentColor: w.creatorColor,
+                              );
+                            },
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              margin: const EdgeInsets.only(right: 6),
+                              decoration: BoxDecoration(
+                                color: c.cardBg.withValues(alpha: 0.92),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: c.shadow.withValues(alpha: 0.08),
+                                    blurRadius: 6,
+                                  ),
+                                ],
                               ),
-                            ],
+                              child: Icon(Icons.more_vert_rounded, size: 18, color: c.textSecondary),
+                            ),
                           ),
-                          child: Icon(
-                            _saved
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
-                            size: 18,
-                            color: _saved
-                                ? Colors.white
-                                : c.textSecondary,
+                          GestureDetector(
+                            onTap: _toggleSave,
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: _saved
+                                    ? const Color(0xFFFF6B6B)
+                                    : c.cardBg.withValues(alpha: 0.92),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: c.shadow.withValues(alpha: 0.08),
+                                    blurRadius: 6,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                _saved
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded,
+                                size: 18,
+                                color: _saved
+                                    ? Colors.white
+                                    : c.textSecondary,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
@@ -296,6 +294,30 @@ class _WidgetPreviewThumb extends StatelessWidget {
       case "mood":
         icon = Icons.mood_rounded;
         color = const Color(0xFFFF8FAB);
+        break;
+      case "art_shuffle":
+        icon = Icons.palette_outlined;
+        color = const Color(0xFFE040FB);
+        break;
+      case "exam_planner":
+        icon = Icons.school_outlined;
+        color = const Color(0xFF42A5F5);
+        break;
+      case "sunrise_sunset":
+        icon = Icons.wb_twilight_rounded;
+        color = const Color(0xFFFF7043);
+        break;
+      case "day_progress":
+        icon = Icons.hourglass_bottom_rounded;
+        color = const Color(0xFF26A69A);
+        break;
+      case "agenda":
+        icon = Icons.view_agenda_outlined;
+        color = const Color(0xFF5C6BC0);
+        break;
+      case "weekly_agenda":
+        icon = Icons.date_range_rounded;
+        color = const Color(0xFF66BB6A);
         break;
       default:
         icon = Icons.widgets_outlined;
