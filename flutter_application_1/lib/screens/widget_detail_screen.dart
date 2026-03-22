@@ -9,7 +9,7 @@ import 'package:widgetopia/services/saved_widgets_service.dart';
 import 'package:widgetopia/data/widget_data.dart';
 import 'package:widgetopia/widgets/widget_card.dart';
 
-class WidgetDetailScreen extends StatelessWidget {
+class WidgetDetailScreen extends StatefulWidget {
   final String title;
   final String tag;
   final String type;
@@ -21,20 +21,79 @@ class WidgetDetailScreen extends StatelessWidget {
     required this.type,
   });
 
+  @override
+  State<WidgetDetailScreen> createState() => _WidgetDetailScreenState();
+}
+
+class _WidgetDetailScreenState extends State<WidgetDetailScreen> {
+  bool _isSaved = false;
+  bool _checking = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSaved();
+    SavedWidgetsService.changeNotifier.addListener(_checkSaved);
+  }
+
+  @override
+  void dispose() {
+    SavedWidgetsService.changeNotifier.removeListener(_checkSaved);
+    super.dispose();
+  }
+
+  Future<void> _checkSaved() async {
+    final saved = await SavedWidgetsService.isAlreadySaved(widget.type);
+    if (!mounted) return;
+    setState(() {
+      _isSaved = saved;
+      _checking = false;
+    });
+  }
+
+  Future<void> _toggleSave() async {
+    if (_isSaved) {
+      await SavedWidgetsService.deleteByType(widget.type);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Widget removed 🗑️'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      final model = SavedWidgetModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        type: widget.type,
+        title: widget.title,
+        config: {},
+        createdAt: DateTime.now(),
+      );
+      await SavedWidgetsService.save(model);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Widget saved 💾'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   Widget _buildPreview() {
-    switch (type) {
-      case "quote":
+    switch (widget.type) {
+      case 'quote':
         return const QuoteWidgetPreview(
-          quote: "Lets get this shit started",
-          author: "Me",
+          quote: 'Lets get this shit started',
+          author: 'Me',
         );
-      case "pomodoro":
+      case 'pomodoro':
         return const PomodoroWidgetPreview();
-      case "notepad":
+      case 'notepad':
         return const NotepadWidgetPreview(theme: '');
-      case "habit":
+      case 'habit':
         return const HabitWidgetPreview(interactive: true);
-      case "mood":
+      case 'mood':
         return const MoodWidgetPreview(interactive: true);
       default:
         return Container(
@@ -51,7 +110,8 @@ class WidgetDetailScreen extends StatelessWidget {
               children: [
                 Icon(Icons.widgets_outlined, color: Colors.black38, size: 48),
                 SizedBox(height: 16),
-                Text("Widget Preview", style: TextStyle(color: Colors.black54, fontSize: 16)),
+                Text('Widget Preview',
+                    style: TextStyle(color: Colors.black54, fontSize: 16)),
               ],
             ),
           ),
@@ -62,48 +122,37 @@ class WidgetDetailScreen extends StatelessWidget {
   Widget _buildMetric(String value, String label) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        Text(value,
+            style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87)),
         const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
-        ),
+        Text(label,
+            style: const TextStyle(fontSize: 12, color: Colors.black54)),
       ],
     );
   }
 
-  Widget _buildStyleSquare(String label, Color color, {Color textColor = Colors.black87}) {
+  Widget _buildStyleSquare(String label, Color color,
+      {Color textColor = Colors.black87}) {
     return Container(
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4))
         ],
       ),
       child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
+        child: Text(label,
+            style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 14)),
       ),
     );
   }
@@ -118,7 +167,8 @@ class WidgetDetailScreen extends StatelessWidget {
           children: [
             /// TOP NAVIGATION BAR
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -129,12 +179,20 @@ class WidgetDetailScreen extends StatelessWidget {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.share_outlined, color: Colors.black87),
+                        icon: const Icon(Icons.share_outlined,
+                            color: Colors.black87),
                         onPressed: () {},
                       ),
                       IconButton(
-                        icon: const Icon(Icons.favorite_border, color: Colors.black87),
-                        onPressed: () {},
+                        icon: Icon(
+                          _isSaved
+                              ? Icons.bookmark_rounded
+                              : Icons.bookmark_border_rounded,
+                          color: _isSaved
+                              ? const Color(0xFF6B4F3A)
+                              : Colors.black87,
+                        ),
+                        onPressed: _toggleSave,
                       ),
                     ],
                   ),
@@ -149,7 +207,7 @@ class WidgetDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// HERO IMAGE WITH FEATURED PILL
+                    /// HERO IMAGE
                     Container(
                       height: 240,
                       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -162,7 +220,8 @@ class WidgetDetailScreen extends StatelessWidget {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFF97316).withValues(alpha: 0.15),
+                            color: const Color(0xFFF97316)
+                                .withValues(alpha: 0.15),
                             blurRadius: 20,
                             offset: const Offset(0, 10),
                           ),
@@ -174,13 +233,14 @@ class WidgetDetailScreen extends StatelessWidget {
                             top: 16,
                             left: 16,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 6),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF59E0B),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Text(
-                                "Featured",
+                                'Featured',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
@@ -210,7 +270,7 @@ class WidgetDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            title,
+                            widget.title,
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w800,
@@ -222,11 +282,9 @@ class WidgetDetailScreen extends StatelessWidget {
                           Row(
                             children: [
                               const Text(
-                                "Perfect for calm aesthetic 🌸",
+                                'Perfect for calm aesthetic 🌸',
                                 style: TextStyle(
-                                  color: Colors.black54,
-                                  fontSize: 14,
-                                ),
+                                    color: Colors.black54, fontSize: 14),
                               ),
                               const Spacer(),
                               Container(
@@ -239,7 +297,7 @@ class WidgetDetailScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                tag,
+                                widget.tag,
                                 style: const TextStyle(
                                   color: Colors.black87,
                                   fontSize: 14,
@@ -256,13 +314,14 @@ class WidgetDetailScreen extends StatelessWidget {
 
                     /// METRICS ROW
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 40),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _buildMetric("12.4k", "Downloads"),
-                          _buildMetric("8.2k", "Saves"),
-                          _buildMetric("4.9", "Rating"),
+                          _buildMetric('12.4k', 'Downloads'),
+                          _buildMetric('8.2k', 'Saves'),
+                          _buildMetric('4.9', 'Rating'),
                         ],
                       ),
                     ),
@@ -278,15 +337,15 @@ class WidgetDetailScreen extends StatelessWidget {
                           Row(
                             children: const [
                               Text(
-                                "Style Variations",
+                                'Style Variations',
                                 style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black87,
-                                ),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87),
                               ),
                               SizedBox(width: 8),
-                              Icon(Icons.tune, size: 18, color: Colors.black54),
+                              Icon(Icons.tune,
+                                  size: 18, color: Colors.black54),
                             ],
                           ),
                           const SizedBox(height: 16),
@@ -298,10 +357,18 @@ class WidgetDetailScreen extends StatelessWidget {
                             crossAxisSpacing: 12,
                             childAspectRatio: 1.4,
                             children: [
-                              _buildStyleSquare("Original", const Color(0xFFFFF7ED), textColor: const Color(0xFFEA580C)),
-                              _buildStyleSquare("Dark", const Color(0xFF1F2933), textColor: Colors.white),
-                              _buildStyleSquare("Pastel", const Color(0xFFFCE4EC), textColor: const Color(0xFFD81B60)),
-                              _buildStyleSquare("Neon", const Color(0xFFF0FDF4), textColor: const Color(0xFF16A34A)),
+                              _buildStyleSquare('Original',
+                                  const Color(0xFFFFF7ED),
+                                  textColor: const Color(0xFFEA580C)),
+                              _buildStyleSquare('Dark',
+                                  const Color(0xFF1F2933),
+                                  textColor: Colors.white),
+                              _buildStyleSquare('Pastel',
+                                  const Color(0xFFFCE4EC),
+                                  textColor: const Color(0xFFD81B60)),
+                              _buildStyleSquare('Neon',
+                                  const Color(0xFFF0FDF4),
+                                  textColor: const Color(0xFF16A34A)),
                             ],
                           ),
                         ],
@@ -317,12 +384,11 @@ class WidgetDetailScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            "Preview",
+                            'Preview',
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black87,
-                            ),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black87),
                           ),
                           const SizedBox(height: 16),
                           Center(child: _buildPreview()),
@@ -337,23 +403,21 @@ class WidgetDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "About this widget",
+                        children: const [
+                          Text(
+                            'About this widget',
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black87,
-                            ),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black87),
                           ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            "This widget brings a perfect balance of functionality and aesthetics to your home screen. Customize it to match your vibe and make your phone truly yours.",
+                          SizedBox(height: 12),
+                          Text(
+                            'This widget brings a perfect balance of functionality and aesthetics to your home screen. Customize it to match your vibe and make your phone truly yours.',
                             style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.black54,
-                              height: 1.5,
-                            ),
+                                fontSize: 15,
+                                color: Colors.black54,
+                                height: 1.5),
                           ),
                         ],
                       ),
@@ -361,16 +425,15 @@ class WidgetDetailScreen extends StatelessWidget {
 
                     const SizedBox(height: 32),
 
-                    /// YOU MIGHT ALSO LIKE SECTION
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: const Text(
-                        "You might also like",
+                    /// YOU MIGHT ALSO LIKE
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        'You might also like',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
-                        ),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black87),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -378,12 +441,14 @@ class WidgetDetailScreen extends StatelessWidget {
                       height: 180,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: 4, // Show 4 recommendations
-                        separatorBuilder: (context, index) => const SizedBox(width: 16),
-                        itemBuilder: (context, index) {
-                          // Pick a few items from widgetFeed (skipping the first few just for variety)
-                          final item = widgetFeed[(index + 3) % widgetFeed.length];
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: 4,
+                        separatorBuilder: (ctx, idx) =>
+                            const SizedBox(width: 16),
+                        itemBuilder: (_, i) {
+                          final item =
+                              widgetFeed[(i + 3) % widgetFeed.length];
                           return SizedBox(
                             width: 140,
                             child: WidgetCard(
@@ -392,7 +457,7 @@ class WidgetDetailScreen extends StatelessWidget {
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => WidgetDetailScreen(
+                                    builder: (_) => WidgetDetailScreen(
                                       title: item.title,
                                       tag: item.tag,
                                       type: item.type,
@@ -406,7 +471,7 @@ class WidgetDetailScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 120), // Bottom padding for fixed button
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
@@ -417,44 +482,35 @@ class WidgetDetailScreen extends StatelessWidget {
       bottomSheet: Container(
         color: Colors.white,
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(double.infinity, 56),
-            backgroundColor: const Color(0xFF111827), // Almost black
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-          onPressed: () async {
-            final widget = SavedWidgetModel(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              type: type,
-              title: title,
-              config: {},
-              createdAt: DateTime.now(),
-            );
-
-            await SavedWidgetsService.save(widget);
-
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Widget saved 💾"),
-                behavior: SnackBarBehavior.floating,
+        child: _checking
+            ? const SizedBox(
+                height: 56,
+                child: Center(child: CircularProgressIndicator()))
+            : ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 56),
+                  backgroundColor: _isSaved
+                      ? const Color(0xFFE8DDD4)
+                      : const Color(0xFF111827),
+                  foregroundColor:
+                      _isSaved ? const Color(0xFF6B4F3A) : Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
+                onPressed: _toggleSave,
+                icon: Icon(
+                  _isSaved
+                      ? Icons.bookmark_remove_outlined
+                      : Icons.add,
+                  size: 20,
+                ),
+                label: Text(
+                  _isSaved ? '✓ Saved — Tap to remove' : 'Add to Home Screen',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
-            );
-          },
-          icon: const Icon(Icons.add, size: 20),
-          label: const Text(
-            "Add to Home Screen",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
       ),
     );
   }

@@ -10,6 +10,8 @@ import 'package:widgetopia/screens/timer_screen.dart';
 import 'package:widgetopia/screens/calendar_screen.dart';
 import 'package:widgetopia/screens/quote_screen.dart';
 import 'package:widgetopia/screens/habit_tracker_screen.dart';
+import 'package:widgetopia/models/saved_widget_model.dart';
+import 'package:widgetopia/services/saved_widgets_service.dart';
 import '../utils/theme_provider.dart';
 
 // ─── Helpers ───
@@ -23,8 +25,34 @@ String _greeting() {
 
 // ─── HomeScreen ───
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  List<SavedWidgetModel> _pinned = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPinned();
+    SavedWidgetsService.changeNotifier.addListener(_loadPinned);
+  }
+
+  @override
+  void dispose() {
+    SavedWidgetsService.changeNotifier.removeListener(_loadPinned);
+    super.dispose();
+  }
+
+  Future<void> _loadPinned() async {
+    final pinned = await SavedWidgetsService.getPinned();
+    if (!mounted) return;
+    setState(() => _pinned = pinned);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +71,6 @@ class HomeScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Greeting
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,28 +99,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       // Cozy Hours pill
                       GestureDetector(
-                        onTap: () => Navigator.of(context).push(
-                          PageRouteBuilder(
-                            transitionDuration:
-                                const Duration(milliseconds: 400),
-                            pageBuilder: (c, a, s) => const TimerScreen(),
-                            transitionsBuilder: (c, animation, s, child) {
-                              final curved = CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.easeOutCubic);
-                              return FadeTransition(
-                                opacity: curved,
-                                child: SlideTransition(
-                                  position: Tween(
-                                          begin: const Offset(0, 0.04),
-                                          end: Offset.zero)
-                                      .animate(curved),
-                                  child: child,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                        onTap: () => _navigate(context, 'pomodoro'),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 10),
@@ -111,8 +117,7 @@ class HomeScreen extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text('🌙',
-                                  style: TextStyle(fontSize: 16)),
+                              const Text('🌙', style: TextStyle(fontSize: 16)),
                               const SizedBox(width: 6),
                               Text(
                                 'Cozy Hours',
@@ -131,11 +136,55 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
+              // ─── 📌 Pinned Widgets Row (only when pinned items exist) ───
+              if (_pinned.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 22, 20, 10),
+                        child: Row(
+                          children: [
+                            const Text('📌', style: TextStyle(fontSize: 13)),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Pinned',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: c.sectionHeaderColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 100,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: _pinned.length,
+                          separatorBuilder: (ctx, idx) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (_, i) => _PinnedChip(
+                            item: _pinned[i],
+                            colors: c,
+                            onTap: () =>
+                                _navigate(context, _pinned[i].type),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
               // ─── Hero Pomodoro Card ───
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: _HeroPomodoroCard(),
+                  padding: EdgeInsets.fromLTRB(
+                      20, _pinned.isEmpty ? 20 : 14, 20, 0),
+                  child: const _HeroPomodoroCard(),
                 ),
               ),
 
@@ -163,22 +212,33 @@ class HomeScreen extends StatelessWidget {
                     crossAxisCount: 2,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 14,
-                    // Taller cells to give widgets enough room
                     childAspectRatio: 0.82,
                   ),
                   delegate: SliverChildListDelegate([
-                    _MiniPomodorCard(onTap: () => _navigate(context, 'pomodoro')),
-                    _MiniQuoteCard(onTap: () => _navigate(context, 'quote')),
-                    _MiniNotepadCard(onTap: () => _navigate(context, 'notepad')),
-                    _MiniCalendarCard(onTap: () => _navigate(context, 'calendar')),
-                    _MiniHabitCard(onTap: () => _navigate(context, 'habit')),
-                    _MiniMoodCard(onTap: () => _navigate(context, 'mood')),
-                    _MiniDayProgressCard(onTap: () => _navigate(context, 'day_progress')),
-                    _MiniSunriseSunsetCard(onTap: () => _navigate(context, 'sunrise_sunset')),
-                    _MiniAgendaCard(onTap: () => _navigate(context, 'agenda')),
-                    _MiniWeeklyAgendaCard(onTap: () => _navigate(context, 'weekly_agenda')),
-                    _MiniExamPlannerCard(onTap: () => _navigate(context, 'exam_planner')),
-                    _MiniArtShuffleCard(onTap: () => _navigate(context, 'art_shuffle')),
+                    _MiniPomodorCard(
+                        onTap: () => _navigate(context, 'pomodoro')),
+                    _MiniQuoteCard(
+                        onTap: () => _navigate(context, 'quote')),
+                    _MiniNotepadCard(
+                        onTap: () => _navigate(context, 'notepad')),
+                    _MiniCalendarCard(
+                        onTap: () => _navigate(context, 'calendar')),
+                    _MiniHabitCard(
+                        onTap: () => _navigate(context, 'habit')),
+                    _MiniMoodCard(
+                        onTap: () => _navigate(context, 'mood')),
+                    _MiniDayProgressCard(
+                        onTap: () => _navigate(context, 'day_progress')),
+                    _MiniSunriseSunsetCard(
+                        onTap: () => _navigate(context, 'sunrise_sunset')),
+                    _MiniAgendaCard(
+                        onTap: () => _navigate(context, 'agenda')),
+                    _MiniWeeklyAgendaCard(
+                        onTap: () => _navigate(context, 'weekly_agenda')),
+                    _MiniExamPlannerCard(
+                        onTap: () => _navigate(context, 'exam_planner')),
+                    _MiniArtShuffleCard(
+                        onTap: () => _navigate(context, 'art_shuffle')),
                   ]),
                 ),
               ),
@@ -227,7 +287,8 @@ class HomeScreen extends StatelessWidget {
           return FadeTransition(
             opacity: curved,
             child: SlideTransition(
-              position: Tween(begin: const Offset(0, 0.04), end: Offset.zero)
+              position: Tween(
+                      begin: const Offset(0, 0.04), end: Offset.zero)
                   .animate(curved),
               child: child,
             ),
@@ -235,6 +296,80 @@ class HomeScreen extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+// ─────────── Pinned Chip (Home) ───────────
+
+class _PinnedChip extends StatelessWidget {
+  final SavedWidgetModel item;
+  final AppColors colors;
+  final VoidCallback onTap;
+
+  const _PinnedChip({
+    required this.item,
+    required this.colors,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = colors;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 90,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        decoration: BoxDecoration(
+          color: c.feedCardBg,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: c.isDark ? 0.2 : 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(_pinnedEmoji(item.type),
+                style: const TextStyle(fontSize: 24)),
+            const SizedBox(height: 6),
+            Text(
+              item.displayTitle,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: c.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _pinnedEmoji(String type) {
+    const map = {
+      'pomodoro': '☕',
+      'quote': '💬',
+      'notepad': '📝',
+      'calendar': '📅',
+      'habit': '🎯',
+      'mood': '💛',
+      'day_progress': '⏳',
+      'sunrise_sunset': '🌅',
+      'art_shuffle': '🎨',
+      'agenda': '📋',
+      'weekly_agenda': '📆',
+      'exam_planner': '📚',
+    };
+    return map[type] ?? '🧩';
   }
 }
 
@@ -414,13 +549,11 @@ class _HeroPomodoroCardState extends State<_HeroPomodoroCard> {
 class _MiniCardShell extends StatelessWidget {
   final Widget child;
   final VoidCallback onTap;
-  final Color? bgColor;
   final Gradient? gradient;
 
   const _MiniCardShell({
     required this.child,
     required this.onTap,
-    this.bgColor,
     this.gradient,
   });
 
@@ -431,7 +564,7 @@ class _MiniCardShell extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: bgColor ?? c.feedCardBg,
+          color: gradient == null ? c.feedCardBg : null,
           gradient: gradient,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
