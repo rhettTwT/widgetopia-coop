@@ -7,6 +7,7 @@ import 'package:widgetopia/models/timer_preset_model.dart';
 import 'package:widgetopia/services/timer_preset_service.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
+import 'package:widgetopia/services/home_widget_service.dart';
 
 // ──────────────────────────────────────────
 //  Theme data
@@ -126,6 +127,12 @@ class _TimerScreenState extends State<TimerScreen>
         _phase = _presets[0].label;
       }
     });
+    _updateHomeWidget();
+  }
+
+  void _updateHomeWidget() {
+    final status = _running ? 'Running' : 'Paused';
+    HomeWidgetService.updatePomodoro(status, _format(_seconds));
   }
 
   @override
@@ -144,16 +151,19 @@ class _TimerScreenState extends State<TimerScreen>
       _timer?.cancel();
       _pulseController.stop();
       setState(() => _running = false);
+      _updateHomeWidget();
     } else {
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (_seconds > 0) {
           setState(() => _seconds--);
+          if (_seconds % 5 == 0) _updateHomeWidget(); // Update every 5s to save battery
         } else {
           _onFinish();
         }
       });
       _pulseController.repeat(reverse: true);
       setState(() => _running = true);
+      _updateHomeWidget();
     }
   }
 
@@ -165,6 +175,7 @@ class _TimerScreenState extends State<TimerScreen>
       _seconds = _maxSeconds;
       _running = false;
     });
+    _updateHomeWidget();
   }
 
   Future<void> _onFinish() async {
@@ -208,6 +219,7 @@ class _TimerScreenState extends State<TimerScreen>
         _maxSeconds = _seconds;
       }
     });
+    _updateHomeWidget();
   }
 
   void _selectPreset(int index) {
@@ -221,6 +233,7 @@ class _TimerScreenState extends State<TimerScreen>
       _maxSeconds = _seconds;
       _running = false;
     });
+    _updateHomeWidget();
   }
 
   // ────────── Helpers ──────────

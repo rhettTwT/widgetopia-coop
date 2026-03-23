@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/note_model.dart';
 import '../widgets/checklist_item_tile.dart';
 import 'package:uuid/uuid.dart';
+import '../services/home_widget_service.dart';
 
 class NotepadScreen extends StatefulWidget {
   const NotepadScreen({super.key});
@@ -41,6 +42,29 @@ class _NotepadScreenState extends State<NotepadScreen> {
       "notes",
       jsonEncode(notes.map((e) => e.toJson()).toList()),
     );
+    _updateHomeWidget();
+  }
+
+  void _updateHomeWidget() {
+    if (notes.isEmpty) {
+      HomeWidgetService.updateNotepad("My Notes", "Tap to add a note...");
+      return;
+    }
+    // Just sync the most recently edited or created note (first one in list if we prefer, or last).
+    // Let's use the first note.
+    final latest = notes.first;
+    String content = "";
+    if (latest.type == NoteType.text) {
+      content = latest.text.isNotEmpty ? latest.text : "Empty note...";
+    } else {
+      if (latest.checklist.isEmpty) {
+        content = "Empty checklist...";
+      } else {
+        content = latest.checklist.map((e) => "• ${e.text}").take(5).join("\n");
+        if (latest.checklist.length > 5) content += "\n...";
+      }
+    }
+    HomeWidgetService.updateNotepad(latest.title, content);
   }
 
   void createNote(NoteType type) {

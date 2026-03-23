@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
+import 'package:widgetopia/services/home_widget_service.dart';
 
 // ──────────────────────────────────────────
 //  Quote theme data (matches timer/calendar/notepad)
@@ -194,6 +195,13 @@ class _QuoteScreenState extends State<QuoteScreen>
       _themeIndex = themeIdx;
       _currentIndex = idx;
     });
+
+    _updateHomeWidget();
+  }
+
+  void _updateHomeWidget() {
+    final q = _currentQuote;
+    HomeWidgetService.updateQuote(q.text, q.author);
   }
 
   Future<void> _saveFavorites() async {
@@ -215,6 +223,7 @@ class _QuoteScreenState extends State<QuoteScreen>
     if (len == 0) return;
     setState(() => _currentIndex = (_currentIndex + 1) % len);
     _prefs.setInt('quote_current_index', _currentIndex);
+    _updateHomeWidget();
     HapticFeedback.lightImpact();
   }
 
@@ -223,6 +232,7 @@ class _QuoteScreenState extends State<QuoteScreen>
     if (len == 0) return;
     setState(() => _currentIndex = (_currentIndex - 1 + len) % len);
     _prefs.setInt('quote_current_index', _currentIndex);
+    _updateHomeWidget();
     HapticFeedback.lightImpact();
   }
 
@@ -235,6 +245,7 @@ class _QuoteScreenState extends State<QuoteScreen>
     } while (newIdx == _currentIndex && len > 1);
     setState(() => _currentIndex = newIdx);
     _prefs.setInt('quote_current_index', _currentIndex);
+    _updateHomeWidget();
     HapticFeedback.mediumImpact();
   }
 

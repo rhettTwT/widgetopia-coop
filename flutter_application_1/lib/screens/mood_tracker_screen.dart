@@ -7,6 +7,7 @@ import '../models/mood_entry_model.dart';
 import '../models/saved_widget_model.dart';
 import '../services/mood_service.dart';
 import '../services/saved_widgets_service.dart';
+import '../services/home_widget_service.dart';
 import '../utils/theme_provider.dart';
 import '../widgets/ambient_background.dart';
 
@@ -76,6 +77,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
 
     await _load();
+    _updateHomeWidget();
     if (!mounted) return;
     setState(() => _saving = false);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -85,6 +87,13 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
         backgroundColor: moodById(_selectedMoodId).color,
       ),
     );
+  }
+
+  void _updateHomeWidget() {
+    if (_selectedMoodId != null) {
+      final m = moodById(_selectedMoodId);
+      HomeWidgetService.updateMood(m.emoji, m.label);
+    }
   }
 
   Future<void> _addWidget() async {

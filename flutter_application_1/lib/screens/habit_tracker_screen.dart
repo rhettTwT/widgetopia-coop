@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/habit_model.dart';
 import '../services/habit_service.dart';
+import '../services/home_widget_service.dart';
 
 // ─── Color Palettes ───
 const _habitColors = [
@@ -102,10 +103,16 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
       _habits = habits;
       _loading = false;
     });
+    _updateHomeWidget();
   }
 
   Future<void> _save() async {
     await HabitService.saveAll(_habits);
+    _updateHomeWidget();
+  }
+
+  void _updateHomeWidget() {
+    HomeWidgetService.updateHabitProgress(_completedToday, _habits.length);
   }
 
   HabitTheme get _theme => _isDark ? HabitTheme.dark : HabitTheme.light;

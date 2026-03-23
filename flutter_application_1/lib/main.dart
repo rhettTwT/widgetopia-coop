@@ -5,8 +5,11 @@ import 'package:widgetopia/screens/saved_widget_screen.dart';
 import 'package:widgetopia/screens/profile_screen.dart';
 import 'package:widgetopia/utils/theme_provider.dart';
 
+import 'package:widgetopia/services/home_widget_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await HomeWidgetService.initialize();
   final themeNotifier = await ThemeNotifier.load();
   runApp(WidgetopiaApp(themeNotifier: themeNotifier));
 }
