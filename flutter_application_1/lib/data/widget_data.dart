@@ -92,6 +92,21 @@ final List<WidgetItem> widgetFeed = [
     emoji: "💛",
     category: "Wellbeing",
   ),
+  WidgetItem(
+    id: "habit_heatmap",
+    title: "Habit Streak Heatmap",
+    subtitle: "GitHub-style streak visualization",
+    image: "assets/images/potato1.png",
+    tag: "STREAKS",
+    type: "habit",
+    creator: "MochiDesigns",
+    creatorColor: const Color(0xFF39D353),
+    rating: 4.9,
+    downloads: "13.7k",
+    cardColor: const Color(0xFFE8F5E9),
+    emoji: "🔥",
+    category: "Personal",
+  ),
   // ─── New Widgets ───
   WidgetItem(
     id: "art_shuffle",

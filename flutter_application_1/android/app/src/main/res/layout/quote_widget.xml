@@ -5,33 +5,98 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg_quote"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="center">
+    android:padding="16dp">
 
+    <!-- Header Row: Emoji + Title + Category Badge -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✨"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Daily Quote"
+            android:textColor="#6B4F3A"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/quote_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/heatmap_cell_bg"
+            android:backgroundTint="#E8C9A0"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:text="INSPIRE"
+            android:textColor="#8B6B4C"
+            android:textSize="9sp"
+            android:textStyle="bold"
+            android:textAllCaps="true" />
+    </LinearLayout>
+
+    <!-- Decorative open-quote mark -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\u201C"
+        android:textSize="36sp"
+        android:textColor="#1AC08552"
+        android:textStyle="bold"
+        android:lineSpacingExtra="-8dp"
+        android:layout_marginBottom="-4dp"
+        android:includeFontPadding="false" />
+
+    <!-- Quote Text -->
     <TextView
         android:id="@+id/quote_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:text="Embrace the journey."
-        android:textColor="#3E2723"
+        android:textColor="#4A3728"
         android:textSize="15sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:maxLines="3"
-        android:lineSpacingExtra="3dp"
-        android:ellipsize="end" />
+        android:textStyle="bold|italic"
+        android:gravity="start"
+        android:maxLines="4"
+        android:lineSpacingExtra="4dp"
+        android:ellipsize="end"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp" />
 
+    <!-- Thin divider -->
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="1dp"
+        android:background="#20C08552"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:layout_marginStart="4dp" />
+
+    <!-- Author -->
     <TextView
         android:id="@+id/quote_author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="- Unknown"
+        android:text="— Unknown"
         android:textColor="#8B6B4C"
-        android:textSize="12sp"
-        android:gravity="center"
-        android:textStyle="italic"
+        android:textSize="11sp"
+        android:gravity="start"
         android:maxLines="1"
-        android:ellipsize="end" />
+        android:ellipsize="end"
+        android:layout_marginStart="4dp" />
 
 </LinearLayout>

@@ -92,7 +92,29 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   void _updateHomeWidget() {
     if (_selectedMoodId != null) {
       final m = moodById(_selectedMoodId);
-      HomeWidgetService.updateMood(m.emoji, m.label);
+
+      // Build 7-day mood color list (Mon-Sun of current week)
+      final now = DateTime.now();
+      final monday = now.subtract(Duration(days: now.weekday - 1));
+      final weekColors = <String>[];
+      for (int i = 0; i < 7; i++) {
+        final date = monday.add(Duration(days: i));
+        final entry = _entryForDate(_entries, date);
+        if (entry != null) {
+          final mood = moodById(entry.moodId);
+          weekColors.add('#${mood.color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}');
+        } else {
+          weekColors.add('#E0D6F0');
+        }
+      }
+
+      HomeWidgetService.updateMood(
+        m.emoji,
+        m.label,
+        description: m.description,
+        checkinCount: _entries.length,
+        weekColors: weekColors,
+      );
     }
   }
 

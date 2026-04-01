@@ -18,8 +18,22 @@ const _habitColors = [
 ];
 
 const _habitEmojis = [
-  "🏃", "💧", "📖", "🧘", "🥗", "💪", "🎯", "🌅",
-  "💤", "🎨", "🎵", "✍️", "🧠", "🫀", "🍎", "🚴",
+  "🏃",
+  "💧",
+  "📖",
+  "🧘",
+  "🥗",
+  "💪",
+  "🎯",
+  "🌅",
+  "💤",
+  "🎨",
+  "🎵",
+  "✍️",
+  "🧠",
+  "🫀",
+  "🍎",
+  "🚴",
 ];
 
 const _dayLabels = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -112,7 +126,8 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
   }
 
   void _updateHomeWidget() {
-    HomeWidgetService.updateHabitProgress(_completedToday, _habits.length);
+    HomeWidgetService.updateHabitProgress(_completedToday, _habits.length, habits: _habits);
+    HomeWidgetService.updateHabitHeatmap(_habits);
   }
 
   HabitTheme get _theme => _isDark ? HabitTheme.dark : HabitTheme.light;
@@ -202,9 +217,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
           // Content
           SafeArea(
             child: _loading
-                ? Center(
-                    child: CircularProgressIndicator(color: t.accent),
-                  )
+                ? Center(child: CircularProgressIndicator(color: t.accent))
                 : CustomScrollView(
                     slivers: [
                       // ─── Header ───
@@ -247,8 +260,9 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color:
-                                            Colors.black.withValues(alpha: 0.08),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.08,
+                                        ),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       ),
@@ -300,14 +314,15 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                             onTap: _showAddHabit,
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 16),
+                                horizontal: 20,
+                                vertical: 16,
+                              ),
                               decoration: BoxDecoration(
                                 color: t.cardColor,
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        Colors.black.withValues(alpha: 0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 16,
                                     offset: const Offset(0, 6),
                                   ),
@@ -321,8 +336,11 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                                       color: t.accent.withValues(alpha: 0.15),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: Icon(Icons.add,
-                                        color: t.accent, size: 22),
+                                    child: Icon(
+                                      Icons.add,
+                                      color: t.accent,
+                                      size: 22,
+                                    ),
                                   ),
                                   const SizedBox(width: 14),
                                   Text(
@@ -334,8 +352,10 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                                     ),
                                   ),
                                   const Spacer(),
-                                  Icon(Icons.chevron_right,
-                                      color: t.textSecondary),
+                                  Icon(
+                                    Icons.chevron_right,
+                                    color: t.textSecondary,
+                                  ),
                                 ],
                               ),
                             ),
@@ -350,9 +370,11 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                             padding: const EdgeInsets.all(40),
                             child: Column(
                               children: [
-                                Icon(Icons.track_changes_rounded,
-                                    size: 64,
-                                    color: t.textSecondary.withValues(alpha: 0.4)),
+                                Icon(
+                                  Icons.track_changes_rounded,
+                                  size: 64,
+                                  color: t.textSecondary.withValues(alpha: 0.4),
+                                ),
                                 const SizedBox(height: 16),
                                 Text(
                                   "No habits yet",
@@ -367,7 +389,9 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
                                   "Tap the button above to create your first habit",
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: t.textSecondary.withValues(alpha: 0.7),
+                                    color: t.textSecondary.withValues(
+                                      alpha: 0.7,
+                                    ),
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -446,10 +470,7 @@ class _StatBadge extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
-                color: theme.textSecondary,
-              ),
+              style: TextStyle(fontSize: 13, color: theme.textSecondary),
             ),
           ],
         ),
@@ -497,8 +518,7 @@ class _HabitCard extends StatelessWidget {
     required this.onDelete,
   });
 
-  Color get _habitColor =>
-      _habitColors[habit.colorIndex % _habitColors.length];
+  Color get _habitColor => _habitColors[habit.colorIndex % _habitColors.length];
 
   @override
   Widget build(BuildContext context) {
@@ -546,8 +566,11 @@ class _HabitCard extends StatelessWidget {
                       color: _habitColor.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(Icons.bar_chart_rounded,
-                        color: _habitColor, size: 18),
+                    child: Icon(
+                      Icons.bar_chart_rounded,
+                      color: _habitColor,
+                      size: 18,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -560,8 +583,11 @@ class _HabitCard extends StatelessWidget {
                       color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.delete_outline,
-                        color: Colors.redAccent, size: 18),
+                    child: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.redAccent,
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -599,18 +625,16 @@ class _HabitCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                           border: active
                               ? null
-                              : Border.all(
-                                  color: theme.gridEmpty, width: 1),
+                              : Border.all(color: theme.gridEmpty, width: 1),
                         ),
                         child: Text(
                           _dayLabels[i],
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight:
-                                active ? FontWeight.w700 : FontWeight.w400,
-                            color: active
-                                ? _habitColor
-                                : theme.textSecondary,
+                            fontWeight: active
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: active ? _habitColor : theme.textSecondary,
                           ),
                         ),
                       );
@@ -664,23 +688,25 @@ class _HabitCard extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: theme.cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text("Delete Habit?",
-            style: TextStyle(color: theme.textPrimary)),
-        content: Text("\"${habit.name}\" and all its data will be removed.",
-            style: TextStyle(color: theme.textSecondary)),
+        title: Text(
+          "Delete Habit?",
+          style: TextStyle(color: theme.textPrimary),
+        ),
+        content: Text(
+          "\"${habit.name}\" and all its data will be removed.",
+          style: TextStyle(color: theme.textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancel",
-                style: TextStyle(color: theme.textSecondary)),
+            child: Text("Cancel", style: TextStyle(color: theme.textSecondary)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               onDelete();
             },
-            child:
-                const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -707,8 +733,7 @@ class _MiniHeatmap extends StatelessWidget {
     // Build a 7x7 grid (rows = weeks going back, cols = days of week)
     final today = DateTime.now();
     // Find the start: 6 weeks ago, Sunday
-    final startOfThisWeek =
-        today.subtract(Duration(days: today.weekday % 7));
+    final startOfThisWeek = today.subtract(Duration(days: today.weekday % 7));
     final gridStart = startOfThisWeek.subtract(const Duration(days: 42));
 
     return LayoutBuilder(
@@ -723,7 +748,8 @@ class _MiniHeatmap extends StatelessWidget {
                   final dayOffset = col * 7 + row;
                   final date = gridStart.add(Duration(days: dayOffset));
                   final completed = habit.isCompleted(date);
-                  final isToday = date.year == today.year &&
+                  final isToday =
+                      date.year == today.year &&
                       date.month == today.month &&
                       date.day == today.day;
                   final isFuture = date.isAfter(today);
@@ -736,8 +762,8 @@ class _MiniHeatmap extends StatelessWidget {
                       color: isFuture
                           ? emptyColor.withValues(alpha: 0.4)
                           : completed
-                              ? color
-                              : emptyColor,
+                          ? color
+                          : emptyColor,
                       borderRadius: BorderRadius.circular(4),
                       border: isToday
                           ? Border.all(color: color, width: 2)
@@ -837,11 +863,14 @@ class _CreateHabitSheetState extends State<_CreateHabitSheet> {
             const SizedBox(height: 20),
 
             // ─── Emoji Picker ───
-            Text("Choose an Icon",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: t.textSecondary)),
+            Text(
+              "Choose an Icon",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: t.textSecondary,
+              ),
+            ),
             const SizedBox(height: 10),
             Wrap(
               spacing: 10,
@@ -873,37 +902,47 @@ class _CreateHabitSheetState extends State<_CreateHabitSheet> {
             const SizedBox(height: 20),
 
             // ─── Name ───
-            Text("Habit Name",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: t.textSecondary)),
+            Text(
+              "Habit Name",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: t.textSecondary,
+              ),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _nameController,
               style: TextStyle(color: t.textPrimary, fontSize: 16),
               decoration: InputDecoration(
                 hintText: "e.g. Drink more water",
-                hintStyle: TextStyle(color: t.textSecondary.withValues(alpha: 0.6)),
+                hintStyle: TextStyle(
+                  color: t.textSecondary.withValues(alpha: 0.6),
+                ),
                 filled: true,
                 fillColor: t.gridEmpty,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
               ),
             ),
 
             const SizedBox(height: 20),
 
             // ─── Color ───
-            Text("Color",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: t.textSecondary)),
+            Text(
+              "Color",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: t.textSecondary,
+              ),
+            ),
             const SizedBox(height: 10),
             Row(
               children: List.generate(_habitColors.length, (i) {
@@ -924,9 +963,9 @@ class _CreateHabitSheetState extends State<_CreateHabitSheet> {
                       boxShadow: selected
                           ? [
                               BoxShadow(
-                                  color:
-                                      _habitColors[i].withValues(alpha: 0.4),
-                                  blurRadius: 8)
+                                color: _habitColors[i].withValues(alpha: 0.4),
+                                blurRadius: 8,
+                              ),
                             ]
                           : null,
                     ),
@@ -938,11 +977,14 @@ class _CreateHabitSheetState extends State<_CreateHabitSheet> {
             const SizedBox(height: 20),
 
             // ─── Target Days ───
-            Text("Target Days",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: t.textSecondary)),
+            Text(
+              "Target Days",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: t.textSecondary,
+              ),
+            ),
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -986,8 +1028,9 @@ class _CreateHabitSheetState extends State<_CreateHabitSheet> {
                 onPressed: _save,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: t.accent,
-                  foregroundColor:
-                      t == HabitTheme.dark ? Colors.black : Colors.white,
+                  foregroundColor: t == HabitTheme.dark
+                      ? Colors.black
+                      : Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -1029,8 +1072,7 @@ class _HabitDetailScreenState extends State<_HabitDetailScreen> {
   HabitModel get habit => widget.habit;
   HabitTheme get t => widget.theme;
 
-  Color get _habitColor =>
-      _habitColors[habit.colorIndex % _habitColors.length];
+  Color get _habitColor => _habitColors[habit.colorIndex % _habitColors.length];
 
   void _toggleDay(DateTime date) {
     setState(() {
@@ -1161,15 +1203,18 @@ class _HabitDetailScreenState extends State<_HabitDetailScreen> {
               ),
               label: Text(
                 habit.isCompletedToday ? "Completed Today ✓" : "Check in Today",
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: habit.isCompletedToday
                     ? _habitColor.withValues(alpha: 0.15)
                     : _habitColor,
-                foregroundColor:
-                    habit.isCompletedToday ? _habitColor : Colors.white,
+                foregroundColor: habit.isCompletedToday
+                    ? _habitColor
+                    : Colors.white,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -1204,8 +1249,9 @@ class _HabitDetailScreenState extends State<_HabitDetailScreen> {
                       ? _habitColor.withValues(alpha: 0.2)
                       : t.gridEmpty,
                   borderRadius: BorderRadius.circular(12),
-                  border:
-                      active ? Border.all(color: _habitColor, width: 2) : null,
+                  border: active
+                      ? Border.all(color: _habitColor, width: 2)
+                      : null,
                 ),
                 child: Text(
                   _dayLabels[i],
@@ -1283,10 +1329,7 @@ class _DetailStat extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, color: theme.textSecondary),
             ),
           ],
         ),
@@ -1319,10 +1362,8 @@ class _FullHeatmap extends StatelessWidget {
     final today = DateTime.now();
     const weeks = 12;
     // Find starting Sunday 12 weeks ago
-    final startOfThisWeek =
-        today.subtract(Duration(days: today.weekday % 7));
-    final gridStart =
-        startOfThisWeek.subtract(Duration(days: (weeks - 1) * 7));
+    final startOfThisWeek = today.subtract(Duration(days: today.weekday % 7));
+    final gridStart = startOfThisWeek.subtract(Duration(days: (weeks - 1) * 7));
 
     final rowLabels = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -1356,7 +1397,8 @@ class _FullHeatmap extends StatelessWidget {
                     final dayOffset = col * 7 + row;
                     final date = gridStart.add(Duration(days: dayOffset));
                     final completed = habit.isCompleted(date);
-                    final isToday = date.year == today.year &&
+                    final isToday =
+                        date.year == today.year &&
                         date.month == today.month &&
                         date.day == today.day;
                     final isFuture = date.isAfter(today);
@@ -1371,8 +1413,8 @@ class _FullHeatmap extends StatelessWidget {
                           color: isFuture
                               ? emptyColor.withValues(alpha: 0.4)
                               : completed
-                                  ? color
-                                  : emptyColor,
+                              ? color
+                              : emptyColor,
                           borderRadius: BorderRadius.circular(4),
                           border: isToday
                               ? Border.all(color: color, width: 2)

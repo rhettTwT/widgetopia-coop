@@ -47,24 +47,30 @@ class _NotepadScreenState extends State<NotepadScreen> {
 
   void _updateHomeWidget() {
     if (notes.isEmpty) {
-      HomeWidgetService.updateNotepad("My Notes", "Tap to add a note...");
+      HomeWidgetService.updateNotepad("My Notes", "Tap to add a note...", noteCount: 0);
       return;
     }
-    // Just sync the most recently edited or created note (first one in list if we prefer, or last).
-    // Let's use the first note.
     final latest = notes.first;
     String content = "";
+    String type = "TEXT";
     if (latest.type == NoteType.text) {
       content = latest.text.isNotEmpty ? latest.text : "Empty note...";
+      type = "TEXT";
     } else {
+      type = "LIST";
       if (latest.checklist.isEmpty) {
         content = "Empty checklist...";
       } else {
-        content = latest.checklist.map((e) => "• ${e.text}").take(5).join("\n");
-        if (latest.checklist.length > 5) content += "\n...";
+        // Format checklist items with check/uncheck symbols for the widget
+        content = latest.checklist.take(5).map((e) => "${e.done ? '☑' : '☐'} ${e.text}").join("|||");
       }
     }
-    HomeWidgetService.updateNotepad(latest.title, content);
+    HomeWidgetService.updateNotepad(
+      latest.title,
+      content,
+      type: type,
+      noteCount: notes.length,
+    );
   }
 
   void createNote(NoteType type) {

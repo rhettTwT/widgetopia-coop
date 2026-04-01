@@ -131,8 +131,15 @@ class _TimerScreenState extends State<TimerScreen>
   }
 
   void _updateHomeWidget() {
-    final status = _running ? 'Running' : 'Paused';
-    HomeWidgetService.updatePomodoro(status, _format(_seconds));
+    final status = _running
+        ? (_phase.toLowerCase().contains('break') ? 'On break' : 'Focus in progress')
+        : (_seconds == _maxSeconds ? 'Ready to focus' : 'Paused');
+    HomeWidgetService.updatePomodoro(
+      status,
+      _format(_seconds),
+      session: _pomodoroCount + 1,
+      totalSessions: 4,
+    );
   }
 
   @override

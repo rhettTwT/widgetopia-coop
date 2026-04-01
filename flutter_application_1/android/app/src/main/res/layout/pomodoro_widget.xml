@@ -5,30 +5,99 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg_pomodoro"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="center">
+    android:padding="16dp">
 
+    <!-- Header: Emoji + Title + Status Pill -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⏱️"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Focus Timer"
+            android:textColor="#7A3B50"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/pomodoro_status_pill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pill_bg"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:text="READY"
+            android:textColor="#FFFFFF"
+            android:textSize="9sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Large Timer Display -->
     <TextView
         android:id="@+id/pomodoro_time"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:text="25:00"
         android:textColor="#C05272"
-        android:textSize="36sp"
+        android:textSize="40sp"
         android:textStyle="bold"
         android:fontFamily="sans-serif-medium"
         android:gravity="center" />
 
+    <!-- Status Text -->
     <TextView
         android:id="@+id/pomodoro_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Focus"
-        android:textColor="#D4728C"
-        android:textSize="14sp"
+        android:text="Ready to focus"
+        android:textColor="#B86A82"
+        android:textSize="12sp"
         android:gravity="center"
-        android:textStyle="bold"
-        android:textAllCaps="true"
-        android:layout_marginTop="4dp" />
+        android:layout_marginBottom="6dp" />
+
+    <!-- Session Info Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/pomodoro_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Session 1 of 4"
+            android:textColor="#A0626F"
+            android:textSize="10sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="  ·  "
+            android:textColor="#D4728C"
+            android:textSize="10sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tap to open →"
+            android:textColor="#A0626F"
+            android:textSize="10sp" />
+    </LinearLayout>
 
 </LinearLayout>

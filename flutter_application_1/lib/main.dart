@@ -6,6 +6,12 @@ import 'package:widgetopia/screens/profile_screen.dart';
 import 'package:widgetopia/utils/theme_provider.dart';
 
 import 'package:widgetopia/services/home_widget_service.dart';
+import 'package:home_widget/home_widget.dart';
+import 'package:widgetopia/screens/quote_screen.dart';
+import 'package:widgetopia/screens/timer_screen.dart';
+import 'package:widgetopia/screens/habit_tracker_screen.dart';
+import 'package:widgetopia/screens/mood_tracker_screen.dart';
+import 'package:widgetopia/screens/notepad_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,6 +98,56 @@ class _MainNavigationState extends State<MainNavigation> {
     SavedScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialDeepLink();
+    HomeWidget.widgetClicked.listen(_handleDeepLink);
+  }
+
+  Future<void> _checkInitialDeepLink() async {
+    try {
+      final uri = await HomeWidget.initiallyLaunchedFromHomeWidget();
+      if (uri != null && mounted) {
+        _handleDeepLink(uri);
+      }
+    } catch (e) {
+      debugPrint('Error handling initial widget deep link: $e');
+    }
+  }
+
+  void _handleDeepLink(Uri? uri) {
+    if (uri == null || uri.scheme != 'widgetopia') return;
+    
+    final host = uri.host;
+    Widget? targetScreen;
+
+    switch (host) {
+      case 'quote':
+        targetScreen = const QuoteScreen();
+        break;
+      case 'pomodoro':
+        targetScreen = const TimerScreen();
+        break;
+      case 'habit':
+        targetScreen = const HabitTrackerScreen();
+        break;
+      case 'mood':
+        targetScreen = const MoodTrackerScreen();
+        break;
+      case 'notepad':
+        targetScreen = const NotepadScreen();
+        break;
+    }
+
+    if (targetScreen != null && mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => targetScreen!),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {

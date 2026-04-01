@@ -201,7 +201,7 @@ class _QuoteScreenState extends State<QuoteScreen>
 
   void _updateHomeWidget() {
     final q = _currentQuote;
-    HomeWidgetService.updateQuote(q.text, q.author);
+    HomeWidgetService.updateQuote(q.text, q.author, category: q.category);
   }
 
   Future<void> _saveFavorites() async {
