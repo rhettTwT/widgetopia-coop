@@ -179,12 +179,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-              // ─── Hero Pomodoro Card ───
+              // ─── Featured Widget Carousel ───
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                      20, _pinned.isEmpty ? 20 : 14, 20, 0),
-                  child: const _HeroPomodoroCard(),
+                  padding: EdgeInsets.only(
+                      top: _pinned.isEmpty ? 20 : 14),
+                  child: _FeaturedCarousel(
+                    onNavigate: (type) => _navigate(context, type),
+                  ),
                 ),
               ),
 
@@ -540,6 +542,440 @@ class _HeroPomodoroCardState extends State<_HeroPomodoroCard> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─────────── Featured Carousel ───────────
+
+class _CarouselItem {
+  final String name;
+  final String emoji;
+  final String label;
+  final LinearGradient gradient;
+  final String type;
+  final Widget Function(AppColors c) previewBuilder;
+
+  const _CarouselItem({
+    required this.name,
+    required this.emoji,
+    required this.label,
+    required this.gradient,
+    required this.type,
+    required this.previewBuilder,
+  });
+}
+
+class _FeaturedCarousel extends StatefulWidget {
+  final void Function(String type) onNavigate;
+  const _FeaturedCarousel({required this.onNavigate});
+
+  @override
+  State<_FeaturedCarousel> createState() => _FeaturedCarouselState();
+}
+
+class _FeaturedCarouselState extends State<_FeaturedCarousel> {
+  late final PageController _pageCtrl;
+  late List<_CarouselItem> _items;
+  int _currentPage = 0;
+  Timer? _autoTimer;
+  Timer? _idleRestartTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageCtrl = PageController(viewportFraction: 0.85);
+    _items = _buildItems();
+    _items.shuffle(Random());
+    _startAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _autoTimer?.cancel();
+    _idleRestartTimer?.cancel();
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    _autoTimer?.cancel();
+    _autoTimer = Timer.periodic(const Duration(seconds: 6), (_) {
+      if (!mounted) return;
+      final next = (_currentPage + 1) % _items.length;
+      _pageCtrl.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  void _onUserSwipe() {
+    // Pause auto-scroll on user interaction, restart after 8s
+    _autoTimer?.cancel();
+    _idleRestartTimer?.cancel();
+    _idleRestartTimer = Timer(const Duration(seconds: 8), () {
+      if (mounted) _startAutoScroll();
+    });
+  }
+
+  List<_CarouselItem> _buildItems() {
+    return [
+      _CarouselItem(
+        name: 'Pomodoro Timer',
+        emoji: '☕',
+        label: 'FOCUS',
+        type: 'pomodoro',
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFE8D5A3),
+            Color(0xFFB5D5C5),
+            Color(0xFF8ECAE6),
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        previewBuilder: (c) => const Text(
+          '25:00',
+          style: TextStyle(
+            fontSize: 44,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+            height: 1.0,
+            letterSpacing: -1.5,
+          ),
+        ),
+      ),
+      _CarouselItem(
+        name: 'Daily Quote',
+        emoji: '💬',
+        label: 'DAILY',
+        type: 'quote',
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFD4A574),
+            Color(0xFFE8C8A0),
+            Color(0xFFF0DCC0),
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        previewBuilder: (c) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '\u201C',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                color: Colors.white.withValues(alpha: 0.4),
+                height: 0.7,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Small steps every day\nlead to big changes.',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontStyle: FontStyle.italic,
+                color: Colors.white,
+                height: 1.4,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+      _CarouselItem(
+        name: 'Mood Tracker',
+        emoji: '💛',
+        label: 'REFLECT',
+        type: 'mood',
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFFFB4A2),
+            Color(0xFFFF8FAB),
+            Color(0xFFE0A0D0),
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        previewBuilder: (c) => const Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Text('😞', style: TextStyle(fontSize: 22)),
+            Text('😕', style: TextStyle(fontSize: 22)),
+            Text('😌', style: TextStyle(fontSize: 26)),
+            Text('😊', style: TextStyle(fontSize: 30)),
+            Text('🤩', style: TextStyle(fontSize: 22)),
+          ],
+        ),
+      ),
+      _CarouselItem(
+        name: 'Habit Tracker',
+        emoji: '🎯',
+        label: 'TRACK',
+        type: 'habit',
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF7B61FF),
+            Color(0xFF9B85FF),
+            Color(0xFFB8A5FF),
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        previewBuilder: (c) => Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _CarouselStat(value: '4', label: 'Habits'),
+            const SizedBox(width: 20),
+            _CarouselStat(value: '7🔥', label: 'Streak'),
+            const SizedBox(width: 20),
+            _CarouselStat(value: '2/4', label: 'Today'),
+          ],
+        ),
+      ),
+      _CarouselItem(
+        name: 'Quick Notes',
+        emoji: '📝',
+        label: 'COZY',
+        type: 'notepad',
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFFA8C0A0),
+            Color(0xFFC5D8B8),
+            Color(0xFFE0ECD0),
+          ],
+          stops: [0.0, 0.5, 1.0],
+        ),
+        previewBuilder: (c) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ...['Buy groceries 🛒', 'Finish assignment ✓', 'Call mom ☎️'].map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      item,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = ThemeProvider.colorsOf(context);
+    return Column(
+      children: [
+        SizedBox(
+          height: 190,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollStartNotification &&
+                  notification.dragDetails != null) {
+                _onUserSwipe();
+              }
+              return false;
+            },
+            child: PageView.builder(
+              controller: _pageCtrl,
+              itemCount: _items.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
+              itemBuilder: (context, index) {
+                final item = _items[index];
+                return AnimatedBuilder(
+                  animation: _pageCtrl,
+                  builder: (context, child) {
+                    double value = 1.0;
+                    if (_pageCtrl.position.haveDimensions) {
+                      value = (_pageCtrl.page ?? 0) - index;
+                      value = (1 - value.abs().clamp(0.0, 1.0));
+                    }
+                    final scale = 0.92 + (value * 0.08);
+                    final opacity = 0.6 + (value * 0.4);
+                    return Transform.scale(
+                      scale: scale,
+                      child: Opacity(
+                        opacity: opacity,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _buildCard(item, c),
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        // ─── Pagination Dots ───
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_items.length, (i) {
+            final isActive = i == _currentPage;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              width: isActive ? 20 : 6,
+              height: 6,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(3),
+                color: isActive
+                    ? c.primary
+                    : c.primary.withValues(alpha: 0.25),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCard(_CarouselItem item, AppColors c) {
+    return GestureDetector(
+      onTap: () => widget.onNavigate(item.type),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          gradient: item.gradient,
+          boxShadow: [
+            BoxShadow(
+              color: item.gradient.colors.last.withValues(alpha: 0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Label chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      item.label,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Preview content
+                  item.previewBuilder(c),
+                  const SizedBox(height: 8),
+                  // Widget name
+                  Text(
+                    item.name,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Emoji badge
+            Positioned(
+              right: 18,
+              top: 18,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(item.emoji,
+                      style: const TextStyle(fontSize: 20)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Small stat column for carousel habit card
+class _CarouselStat extends StatelessWidget {
+  final String value;
+  final String label;
+  const _CarouselStat({required this.value, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withValues(alpha: 0.75),
+          ),
+        ),
+      ],
     );
   }
 }

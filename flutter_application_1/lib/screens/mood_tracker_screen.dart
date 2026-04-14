@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,9 +9,72 @@ import '../models/saved_widget_model.dart';
 import '../services/mood_service.dart';
 import '../services/saved_widgets_service.dart';
 import '../services/home_widget_service.dart';
-import '../utils/theme_provider.dart';
-import '../widgets/ambient_background.dart';
 
+// ──────────────────────────────────────────
+//  Theme data (matches timer/quote/notepad/habit)
+// ──────────────────────────────────────────
+class _MoodScreenTheme {
+  final String name;
+  final Color primary;
+  final Color secondary;
+  final Color accent;
+  final Color background;
+  final Color textColor;
+  final Color cardColor;
+
+  const _MoodScreenTheme({
+    required this.name,
+    required this.primary,
+    required this.secondary,
+    required this.accent,
+    required this.background,
+    required this.textColor,
+    required this.cardColor,
+  });
+}
+
+const List<_MoodScreenTheme> _themes = [
+  _MoodScreenTheme(
+    name: 'Latte',
+    primary: Color(0xFFD4A574),
+    secondary: Color(0xFFE8C9A0),
+    accent: Color(0xFFC08552),
+    background: Color(0xFFFFF8EE),
+    textColor: Color(0xFF4A3728),
+    cardColor: Color(0xFFFFF0DC),
+  ),
+  _MoodScreenTheme(
+    name: 'Berry',
+    primary: Color(0xFFD4728C),
+    secondary: Color(0xFFE8A0B4),
+    accent: Color(0xFFC05272),
+    background: Color(0xFFFFF0F3),
+    textColor: Color(0xFF4A2838),
+    cardColor: Color(0xFFFFE0E8),
+  ),
+  _MoodScreenTheme(
+    name: 'Matcha',
+    primary: Color(0xFF74B88A),
+    secondary: Color(0xFFA0D4B0),
+    accent: Color(0xFF52996A),
+    background: Color(0xFFF0FFF4),
+    textColor: Color(0xFF28472E),
+    cardColor: Color(0xFFDCF5E4),
+  ),
+  _MoodScreenTheme(
+    name: 'Lavender',
+    primary: Color(0xFF9B8EC4),
+    secondary: Color(0xFFBDB2D8),
+    accent: Color(0xFF7B6EA4),
+    background: Color(0xFFF5F0FF),
+    textColor: Color(0xFF352E4A),
+    cardColor: Color(0xFFEAE0FF),
+  ),
+];
+
+// ══════════════════════════════════════
+//  Mood Tracker Screen — Widget Detail Style
+// ══════════════════════════════════════
 class MoodTrackerScreen extends StatefulWidget {
   const MoodTrackerScreen({super.key});
 
@@ -18,7 +82,8 @@ class MoodTrackerScreen extends StatefulWidget {
   State<MoodTrackerScreen> createState() => _MoodTrackerScreenState();
 }
 
-class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
+class _MoodTrackerScreenState extends State<MoodTrackerScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _noteController = TextEditingController();
   List<MoodEntryModel> _entries = [];
   String? _selectedMoodId;
@@ -26,17 +91,33 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   bool _saving = false;
   late DateTime _calendarMonth;
 
+  // Theme
+  int _themeIndex = 0;
+  _MoodScreenTheme get _theme => _themes[_themeIndex];
+  bool _isFavorite = false;
+
+  late AnimationController _breathController;
+  late Animation<double> _breathAnim;
+
   @override
   void initState() {
     super.initState();
     final now = DateTime.now();
     _calendarMonth = DateTime(now.year, now.month);
+    _breathController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+    _breathAnim = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _breathController, curve: Curves.easeInOut),
+    );
     _load();
   }
 
   @override
   void dispose() {
     _noteController.dispose();
+    _breathController.dispose();
     super.dispose();
   }
 
@@ -61,6 +142,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   }
 
   MoodEntryModel? get _todayEntry => _entryForDate(_entries, DateTime.now());
+  int get _checkInCount => _entries.length;
 
   Future<void> _saveToday() async {
     if (_selectedMoodId == null || _saving) return;
@@ -84,7 +166,8 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
       SnackBar(
         content: const Text('Mood saved ✨'),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: moodById(_selectedMoodId).color,
+        backgroundColor: _theme.accent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -92,8 +175,6 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
   void _updateHomeWidget() {
     if (_selectedMoodId != null) {
       final m = moodById(_selectedMoodId);
-
-      // Build 7-day mood color list (Mon-Sun of current week)
       final now = DateTime.now();
       final monday = now.subtract(Duration(days: now.weekday - 1));
       final weekColors = <String>[];
@@ -102,12 +183,12 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
         final entry = _entryForDate(_entries, date);
         if (entry != null) {
           final mood = moodById(entry.moodId);
-          weekColors.add('#${mood.color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}');
+          weekColors.add(
+              '#${mood.color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}');
         } else {
           weekColors.add('#E0D6F0');
         }
       }
-
       HomeWidgetService.updateMood(
         m.emoji,
         m.label,
@@ -118,138 +199,507 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     }
   }
 
-  Future<void> _addWidget() async {
-    final widget = SavedWidgetModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      type: 'mood',
-      title: 'Mood Tracker',
-      config: {},
-      createdAt: DateTime.now(),
-    );
-    await SavedWidgetsService.save(widget);
+  void _setTheme(int index) => setState(() => _themeIndex = index);
 
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Widget added! ✨'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: moodById(_selectedMoodId).color,
+  // ══════════════════════════════════════
+  //  BUILD
+  // ══════════════════════════════════════
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Scaffold(
+        backgroundColor: _theme.background,
+        body: Center(child: CircularProgressIndicator(color: _theme.accent)),
+      );
+    }
+
+    final selectedMood = moodById(_selectedMoodId);
+
+    return Scaffold(
+      backgroundColor: _theme.background,
+      body: Stack(
+        children: [
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _buildHeroPreview(selectedMood)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _buildInfoCard(),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                  child: _buildCheckInSection(selectedMood),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _buildNoteSection(selectedMood),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _buildMoodAnalysis(),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _buildCalendarSection(),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _buildInfluencesSection(),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                  child: _buildThemeVariations(),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
+          ),
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+            child: _buildAddWidgetButton(),
+          ),
+        ],
       ),
     );
   }
 
-  int get _checkInCount => _entries.length;
+  // ────────── Hero Preview ──────────
 
-  @override
-  Widget build(BuildContext context) {
-    final c = ThemeProvider.colorsOf(context);
-    final selectedMood = moodById(_selectedMoodId);
+  Widget _buildHeroPreview(MoodOption selectedMood) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      height: 300,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            _theme.cardColor,
+            _theme.secondary.withValues(alpha: 0.4),
+            _theme.background,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _theme.primary.withValues(alpha: 0.15),
+            blurRadius: 30,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Stack(
+          children: [
+            ..._buildDecorations(),
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: AmbientBackground(
-        child: SafeArea(
-          child: _loading
-              ? Center(child: CircularProgressIndicator(color: c.primary))
-              : ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-                  children: [
-                    // ── Back button row ──
-                    Row(
+            // Centered mood preview
+            Center(
+              child: AnimatedBuilder(
+                animation: _breathAnim,
+                builder: (context, child) {
+                  return Container(
+                    width: 200,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 24, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.88),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _theme.primary.withValues(
+                              alpha: 0.1 + _breathAnim.value * 0.06),
+                          blurRadius: 24 + _breathAnim.value * 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                      border: Border.all(
+                        color: _theme.primary.withValues(alpha: 0.15),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: c.cardBg,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: c.shadow.withValues(alpha: 0.06),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                        // Mood emoji
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: selectedMood.color
+                                .withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              selectedMood.emoji,
+                              style: const TextStyle(fontSize: 30),
                             ),
-                            child: Icon(
-                              Icons.arrow_back_rounded,
-                              color: c.textPrimary,
-                              size: 20,
-                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          selectedMood.label,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            color: _theme.textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _checkInCount > 0
+                              ? '$_checkInCount check-ins'
+                              : 'No check-ins yet',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color:
+                                _theme.textColor.withValues(alpha: 0.4),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-
-                    // ── CHECK-IN SECTION ──
-                    _buildCheckInSection(c, selectedMood),
-
-                    const SizedBox(height: 28),
-
-                    // ── NOTE + SAVE ──
-                    _buildNoteSection(c, selectedMood),
-
-                    const SizedBox(height: 28),
-
-                    // ── MOOD ANALYSIS CHART ──
-                    _buildMoodAnalysis(c),
-
-                    const SizedBox(height: 28),
-
-                    // ── MONTHLY CALENDAR ──
-                    _buildCalendarSection(c),
-
-                    const SizedBox(height: 28),
-
-                    // ── MOOD INFLUENCES ──
-                    _buildInfluencesSection(c),
-                  ],
-                ),
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-        child: SizedBox(
-          height: 56,
-          child: ElevatedButton.icon(
-            onPressed: _addWidget,
-            icon: const Icon(Icons.add_home_rounded),
-            label: const Text('Add to Home Screen'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: selectedMood.color,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+                  );
+                },
               ),
             ),
-          ),
+
+            // Nav buttons
+            SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _iconBtn(
+                      icon: Icons.arrow_back_rounded,
+                      onTap: () => Navigator.pop(context),
+                    ),
+                    Row(
+                      children: [
+                        _iconBtn(
+                          icon: _isFavorite
+                              ? Icons.favorite_rounded
+                              : Icons.favorite_border_rounded,
+                          onTap: () =>
+                              setState(() => _isFavorite = !_isFavorite),
+                          color: _isFavorite ? Colors.redAccent : null,
+                        ),
+                        const SizedBox(width: 8),
+                        _iconBtn(
+                          icon: Icons.share_rounded,
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // ═══════════════ CHECK-IN SECTION ═══════════════
+  Widget _iconBtn({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.85),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(icon,
+            size: 20,
+            color: color ?? _theme.textColor.withValues(alpha: 0.7)),
+      ),
+    );
+  }
 
-  Widget _buildCheckInSection(AppColors c, MoodOption selectedMood) {
+  List<Widget> _buildDecorations() {
+    final rng = Random(55);
+    final List<Widget> items = [];
+    final blobColors = [
+      _theme.primary.withValues(alpha: 0.1),
+      _theme.secondary.withValues(alpha: 0.12),
+      const Color(0xFFFFD6E0).withValues(alpha: 0.12),
+      const Color(0xFFD4E8D0).withValues(alpha: 0.12),
+    ];
+    for (int i = 0; i < 5; i++) {
+      final size = 35.0 + rng.nextDouble() * 55;
+      items.add(Positioned(
+        left: rng.nextDouble() * 300,
+        top: rng.nextDouble() * 250,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: blobColors[i % blobColors.length],
+          ),
+        ),
+      ));
+    }
+    for (int i = 0; i < 12; i++) {
+      final s = 3.0 + rng.nextDouble() * 5;
+      items.add(Positioned(
+        left: rng.nextDouble() * 340,
+        top: rng.nextDouble() * 280,
+        child: Container(
+          width: s,
+          height: s,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _theme.primary
+                .withValues(alpha: 0.15 + rng.nextDouble() * 0.15),
+          ),
+        ),
+      ));
+    }
+    return items;
+  }
+
+  // ────────── Info Card ──────────
+
+  Widget _buildInfoCard() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: c.cardBg,
-        borderRadius: BorderRadius.circular(28),
+        color: Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _theme.primary.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: c.shadow.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
+            color: _theme.primary.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text('Mood Tracker',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: _theme.textColor,
+                    )),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8E1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.star_rounded,
+                        color: Color(0xFFFFB800), size: 18),
+                    const SizedBox(width: 3),
+                    Text('4.7',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: _theme.textColor,
+                        )),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: _theme.secondary.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text('W',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: _theme.accent,
+                      )),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'by Widgetopia Studio',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: _theme.textColor.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            'Track your emotions daily with beautiful mood check-ins, weekly analysis charts, and monthly calendar insights. Understand your emotional patterns.',
+            style: TextStyle(
+              fontSize: 13.5,
+              height: 1.5,
+              color: _theme.textColor.withValues(alpha: 0.65),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: ['#mood', '#emotions', '#daily', '#wellness']
+                .map((tag) => Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _theme.cardColor,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: _theme.primary.withValues(alpha: 0.15),
+                        ),
+                      ),
+                      child: Text(tag,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: _theme.accent,
+                          )),
+                    ))
+                .toList(),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _statBadge(
+                icon: Icons.download_rounded,
+                value: '14.1k',
+                label: 'downloads',
+                badgeColor: const Color(0xFFFFF0DC),
+                iconColor: _theme.primary,
+              ),
+              const SizedBox(width: 12),
+              _statBadge(
+                icon: Icons.palette_rounded,
+                value: '4',
+                label: 'themes',
+                badgeColor: const Color(0xFFE8F5E9),
+                iconColor: const Color(0xFF74B88A),
+              ),
+              const SizedBox(width: 12),
+              _statBadge(
+                icon: Icons.rate_review_rounded,
+                value: '2.6k',
+                label: 'reviews',
+                badgeColor: const Color(0xFFF3E5F5),
+                iconColor: const Color(0xFF9B8EC4),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statBadge({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color badgeColor,
+    required Color iconColor,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: badgeColor.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 16, color: iconColor),
+                const SizedBox(width: 4),
+                Text(value,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: _theme.textColor,
+                    )),
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text(label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: _theme.textColor.withValues(alpha: 0.45),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ────────── Check-In Section ──────────
+
+  Widget _buildCheckInSection(MoodOption selectedMood) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _theme.primary.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: _theme.primary.withValues(alpha: 0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Column(
         children: [
-          // Check-in counter
           Text(
             _checkInCount > 0
                 ? '${_ordinal(_checkInCount)} CHECK-IN'
@@ -258,20 +708,19 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.5,
-              color: c.textSecondary,
+              color: _theme.textColor.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'How are you today?',
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: c.textPrimary,
+              color: _theme.textColor,
             ),
           ),
-          const SizedBox(height: 24),
-          // Mood emoji row
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: moodOptions.map((option) {
@@ -286,12 +735,12 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       curve: Curves.easeOutCubic,
-                      width: selected ? 60 : 52,
-                      height: selected ? 60 : 52,
+                      width: selected ? 56 : 48,
+                      height: selected ? 56 : 48,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: option.color.withValues(
-                          alpha: selected ? 0.9 : 0.2,
+                          alpha: selected ? 0.85 : 0.18,
                         ),
                         shape: BoxShape.circle,
                         border: Border.all(
@@ -303,26 +752,28 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                         boxShadow: selected
                             ? [
                                 BoxShadow(
-                                  color: option.color.withValues(alpha: 0.35),
-                                  blurRadius: 14,
-                                  offset: const Offset(0, 5),
+                                  color: option.color.withValues(alpha: 0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
                               ]
                             : [],
                       ),
                       child: Text(
                         option.emoji,
-                        style: TextStyle(fontSize: selected ? 28 : 24),
+                        style: TextStyle(fontSize: selected ? 26 : 22),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       option.label.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 9,
                         fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                        color: selected ? option.color : c.textSecondary,
+                        letterSpacing: 0.3,
+                        color: selected
+                            ? option.color
+                            : _theme.textColor.withValues(alpha: 0.45),
                       ),
                     ),
                   ],
@@ -335,51 +786,51 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
-  // ═══════════════ NOTE + SAVE ═══════════════
+  // ────────── Note + Save ──────────
 
-  Widget _buildNoteSection(AppColors c, MoodOption selectedMood) {
+  Widget _buildNoteSection(MoodOption selectedMood) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: c.cardBg,
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _theme.primary.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: c.shadow.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: _theme.primary.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Add a note',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: c.textPrimary,
-            ),
-          ),
+          Text('Add a note',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: _theme.textColor,
+              )),
           const SizedBox(height: 4),
-          Text(
-            'A short reflection helps you spot trends.',
-            style: TextStyle(fontSize: 13, color: c.textSecondary),
-          ),
+          Text('A short reflection helps you spot trends.',
+              style: TextStyle(
+                  fontSize: 13,
+                  color: _theme.textColor.withValues(alpha: 0.5))),
           const SizedBox(height: 14),
           Container(
             decoration: BoxDecoration(
-              color: c.chipBg,
+              color: _theme.cardColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: TextField(
               controller: _noteController,
               maxLines: 3,
-              style: TextStyle(color: c.textPrimary, fontSize: 14),
+              style: TextStyle(color: _theme.textColor, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'What influenced your mood today?',
-                hintStyle: TextStyle(color: c.textMuted),
+                hintStyle: TextStyle(
+                    color: _theme.textColor.withValues(alpha: 0.3)),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.all(14),
               ),
@@ -392,13 +843,11 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
             child: ElevatedButton.icon(
               onPressed: _selectedMoodId == null ? null : _saveToday,
               icon: _saving
-                  ? SizedBox(
+                  ? const SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: c.cardBg,
-                      ),
+                          strokeWidth: 2, color: Colors.white),
                     )
                   : const Icon(Icons.favorite_rounded, size: 18),
               label: Text(
@@ -408,7 +857,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: selectedMood.color,
+                backgroundColor: _theme.accent,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -422,10 +871,9 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
-  // ═══════════════ MOOD ANALYSIS CHART ═══════════════
+  // ────────── Mood Analysis ──────────
 
-  Widget _buildMoodAnalysis(AppColors c) {
-    // Get this week's mood data (Mon - Sun)
+  Widget _buildMoodAnalysis() {
     final now = DateTime.now();
     final monday = now.subtract(Duration(days: now.weekday - 1));
     final weekMoods = <MoodOption?>[];
@@ -438,71 +886,59 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: c.cardBg,
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _theme.primary.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: c.shadow.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: _theme.primary.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Mood Analysis',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: c.textPrimary,
-            ),
-          ),
+          Text('Mood Analysis',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: _theme.textColor,
+              )),
           const SizedBox(height: 14),
           Row(
             children: [
-              Text(
-                'This week',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: c.textPrimary,
-                ),
-              ),
+              Text('This week',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: _theme.textColor,
+                  )),
               const Spacer(),
-              _navCircle(c, Icons.chevron_left_rounded),
+              _navCircle(Icons.chevron_left_rounded),
               const SizedBox(width: 8),
-              _navCircle(c, Icons.chevron_right_rounded),
+              _navCircle(Icons.chevron_right_rounded),
             ],
           ),
           const SizedBox(height: 20),
-          // Chart area
           SizedBox(
             height: 160,
             child: CustomPaint(
               size: const Size(double.infinity, 160),
-              painter: _MoodChartPainter(
-                weekMoods: weekMoods,
-                isDark: c.isDark,
-              ),
+              painter: _MoodChartPainter(weekMoods: weekMoods),
             ),
           ),
           const SizedBox(height: 10),
-          // Day labels
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
-                .map(
-                  (d) => Text(
-                    d,
+                .map((d) => Text(d,
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: c.textSecondary,
-                    ),
-                  ),
-                )
+                      color: _theme.textColor.withValues(alpha: 0.45),
+                    )))
                 .toList(),
           ),
         ],
@@ -510,115 +946,101 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
-  Widget _navCircle(AppColors c, IconData icon) {
+  Widget _navCircle(IconData icon) {
     return Container(
       width: 34,
       height: 34,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: c.chipBg,
-        border: Border.all(color: c.divider),
+        color: _theme.cardColor,
+        border: Border.all(color: _theme.primary.withValues(alpha: 0.15)),
       ),
-      child: Icon(icon, size: 20, color: c.textSecondary),
+      child: Icon(icon,
+          size: 20, color: _theme.textColor.withValues(alpha: 0.5)),
     );
   }
 
-  // ═══════════════ MONTHLY CALENDAR ═══════════════
+  // ────────── Calendar ──────────
 
-  Widget _buildCalendarSection(AppColors c) {
+  Widget _buildCalendarSection() {
     final year = _calendarMonth.year;
     final month = _calendarMonth.month;
     final firstDay = DateTime(year, month, 1);
     final daysInMonth = DateTime(year, month + 1, 0).day;
-    final startWeekday = firstDay.weekday % 7; // 0=Sun
+    final startWeekday = firstDay.weekday % 7;
     final monthLabel = DateFormat('MMM yyyy').format(_calendarMonth);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: c.cardBg,
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _theme.primary.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: c.shadow.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: _theme.primary.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Month header
           Row(
             children: [
-              Text(
-                monthLabel,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: c.textPrimary,
-                ),
-              ),
+              Text(monthLabel,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: _theme.textColor,
+                  )),
               const Spacer(),
               GestureDetector(
                 onTap: () => setState(() {
                   _calendarMonth = DateTime(year, month - 1);
                 }),
-                child: _navCircle(c, Icons.chevron_left_rounded),
+                child: _navCircle(Icons.chevron_left_rounded),
               ),
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: () => setState(() {
                   _calendarMonth = DateTime(year, month + 1);
                 }),
-                child: _navCircle(c, Icons.chevron_right_rounded),
+                child: _navCircle(Icons.chevron_right_rounded),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          // Weekday headers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                .map(
-                  (d) => SizedBox(
-                    width: 38,
-                    child: Center(
-                      child: Text(
-                        d,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: c.textSecondary,
-                        ),
+                .map((d) => SizedBox(
+                      width: 38,
+                      child: Center(
+                        child: Text(d,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: _theme.textColor.withValues(alpha: 0.5),
+                            )),
                       ),
-                    ),
-                  ),
-                )
+                    ))
                 .toList(),
           ),
           const SizedBox(height: 10),
-          // Calendar grid
-          _buildCalendarGrid(c, startWeekday, daysInMonth, year, month),
+          _buildCalendarGrid(startWeekday, daysInMonth, year, month),
         ],
       ),
     );
   }
 
   Widget _buildCalendarGrid(
-    AppColors c,
-    int startWeekday,
-    int daysInMonth,
-    int year,
-    int month,
-  ) {
+      int startWeekday, int daysInMonth, int year, int month) {
     final today = DateTime.now();
     final rows = <Widget>[];
     int day = 1;
-
-    // Calculate total cells needed
     final totalCells = startWeekday + daysInMonth;
     final rowCount = (totalCells / 7).ceil();
 
@@ -631,34 +1053,25 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
         } else {
           final date = DateTime(year, month, day);
           final entry = _entryForDate(_entries, date);
-          final isToday =
-              date.year == today.year &&
+          final isToday = date.year == today.year &&
               date.month == today.month &&
               date.day == today.day;
-          cells.add(_buildCalendarDay(c, day, entry, isToday));
+          cells.add(_buildCalendarDay(day, entry, isToday));
           day++;
         }
       }
-      rows.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: cells,
-          ),
+      rows.add(Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: cells,
         ),
-      );
+      ));
     }
-
     return Column(children: rows);
   }
 
-  Widget _buildCalendarDay(
-    AppColors c,
-    int day,
-    MoodEntryModel? entry,
-    bool isToday,
-  ) {
+  Widget _buildCalendarDay(int day, MoodEntryModel? entry, bool isToday) {
     final mood = entry != null ? moodById(entry.moodId) : null;
     final hasEntry = entry != null;
 
@@ -667,17 +1080,15 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
       height: 48,
       child: Column(
         children: [
-          // Day number
-          Text(
-            '$day',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: isToday ? FontWeight.w800 : FontWeight.w500,
-              color: isToday ? c.primary : c.textSecondary,
-            ),
-          ),
+          Text('$day',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isToday ? FontWeight.w800 : FontWeight.w500,
+                color: isToday
+                    ? _theme.accent
+                    : _theme.textColor.withValues(alpha: 0.5),
+              )),
           const SizedBox(height: 2),
-          // Mood circle
           Container(
             width: 32,
             height: 32,
@@ -689,26 +1100,23 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                   : Colors.transparent,
               border: isToday && !hasEntry
                   ? Border.all(
-                      color: c.primary.withValues(alpha: 0.4),
-                      width: 1.5,
-                    )
+                      color: _theme.primary.withValues(alpha: 0.4),
+                      width: 1.5)
                   : null,
             ),
             child: hasEntry
-                ? Text(
-                    _moodFace(mood!.id),
-                    style: const TextStyle(fontSize: 16),
-                  )
+                ? Text(_moodFace(mood!.id),
+                    style: const TextStyle(fontSize: 16))
                 : (isToday
-                      ? Container(
-                          width: 6,
-                          height: 6,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: c.primary.withValues(alpha: 0.4),
-                          ),
-                        )
-                      : null),
+                    ? Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _theme.primary.withValues(alpha: 0.4),
+                        ),
+                      )
+                    : null),
           ),
         ],
       ),
@@ -732,60 +1140,58 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     }
   }
 
-  // ═══════════════ MOOD INFLUENCES ═══════════════
+  // ────────── Influences ──────────
 
-  Widget _buildInfluencesSection(AppColors c) {
+  Widget _buildInfluencesSection() {
     final influences = [
       _InfluenceItem(
-        'Exercise',
-        Icons.fitness_center_rounded,
-        const Color(0xFF4ECDC4),
-      ),
-      _InfluenceItem('Sleep', Icons.bedtime_rounded, const Color(0xFF7B61FF)),
-      _InfluenceItem('Social', Icons.people_rounded, const Color(0xFFFF8FAB)),
-      _InfluenceItem('Work', Icons.work_rounded, const Color(0xFFFFC75F)),
-      _InfluenceItem('Nature', Icons.park_rounded, const Color(0xFF69F0AE)),
-      _InfluenceItem('Food', Icons.restaurant_rounded, const Color(0xFFFF7043)),
+          'Exercise', Icons.fitness_center_rounded, const Color(0xFF4ECDC4)),
       _InfluenceItem(
-        'Music',
-        Icons.music_note_rounded,
-        const Color(0xFF7CC6FE),
-      ),
+          'Sleep', Icons.bedtime_rounded, const Color(0xFF7B61FF)),
       _InfluenceItem(
-        'Reading',
-        Icons.menu_book_rounded,
-        const Color(0xFF8E7DF2),
-      ),
+          'Social', Icons.people_rounded, const Color(0xFFFF8FAB)),
+      _InfluenceItem(
+          'Work', Icons.work_rounded, const Color(0xFFFFC75F)),
+      _InfluenceItem(
+          'Nature', Icons.park_rounded, const Color(0xFF69F0AE)),
+      _InfluenceItem(
+          'Food', Icons.restaurant_rounded, const Color(0xFFFF7043)),
+      _InfluenceItem(
+          'Music', Icons.music_note_rounded, const Color(0xFF7CC6FE)),
+      _InfluenceItem(
+          'Reading', Icons.menu_book_rounded, const Color(0xFF8E7DF2)),
     ];
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: c.cardBg,
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: _theme.primary.withValues(alpha: 0.08)),
         boxShadow: [
           BoxShadow(
-            color: c.shadow.withValues(alpha: 0.06),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: _theme.primary.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Mood influences',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: c.textPrimary,
-            ),
-          ),
+          Text('Mood influences',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: _theme.textColor,
+              )),
           const SizedBox(height: 6),
           Text(
             "Discover what adds to negative and positive aspects of your day",
-            style: TextStyle(fontSize: 13, height: 1.5, color: c.textSecondary),
+            style: TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: _theme.textColor.withValues(alpha: 0.5)),
           ),
           const SizedBox(height: 18),
           Wrap(
@@ -794,27 +1200,24 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
             children: influences.map((item) {
               return Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
+                    horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: item.color.withValues(alpha: 0.12),
+                  color: item.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: item.color.withValues(alpha: 0.2)),
+                  border:
+                      Border.all(color: item.color.withValues(alpha: 0.2)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(item.icon, size: 16, color: item.color),
                     const SizedBox(width: 6),
-                    Text(
-                      item.label,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: item.color,
-                      ),
-                    ),
+                    Text(item.label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: item.color,
+                        )),
                   ],
                 ),
               );
@@ -825,7 +1228,153 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     );
   }
 
-  // ═══════════════ HELPERS ═══════════════
+  // ────────── Theme Variations ──────────
+
+  Widget _buildThemeVariations() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.palette_rounded,
+                size: 18, color: _theme.textColor.withValues(alpha: 0.5)),
+            const SizedBox(width: 8),
+            Text('Theme Variations',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: _theme.textColor,
+                )),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: List.generate(_themes.length, (i) {
+            final t = _themes[i];
+            final sel = i == _themeIndex;
+            return GestureDetector(
+              onTap: () => _setTheme(i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                width: 76,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: sel
+                      ? t.primary.withValues(alpha: 0.15)
+                      : Colors.white.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(16),
+                  border: sel
+                      ? Border.all(color: t.primary, width: 2)
+                      : Border.all(
+                          color: t.primary.withValues(alpha: 0.12)),
+                  boxShadow: sel
+                      ? [
+                          BoxShadow(
+                            color: t.primary.withValues(alpha: 0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _dot(t.primary, 14),
+                        const SizedBox(width: 4),
+                        _dot(t.secondary, 14),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(t.name,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: t.textColor,
+                        )),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _dot(Color color, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+    );
+  }
+
+  // ────────── Add Widget Button ──────────
+
+  Widget _buildAddWidgetButton() {
+    return GestureDetector(
+      onTap: () async {
+        final widget = SavedWidgetModel(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: 'mood',
+          title: 'Mood Tracker',
+          config: {'theme': _themeIndex},
+          createdAt: DateTime.now(),
+        );
+        await SavedWidgetsService.save(widget);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Widget added! ✨'),
+            backgroundColor: _theme.accent,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [_theme.primary, _theme.accent],
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: _theme.primary.withValues(alpha: 0.35),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.download_rounded, color: Colors.white, size: 20),
+            SizedBox(width: 8),
+            Text('Add Widget',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                  letterSpacing: 0.5,
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ────────── Helpers ──────────
 
   String _ordinal(int n) {
     if (n >= 11 && n <= 13) return '${n}TH';
@@ -855,12 +1404,10 @@ class _InfluenceItem {
 
 class _MoodChartPainter extends CustomPainter {
   final List<MoodOption?> weekMoods;
-  final bool isDark;
 
-  _MoodChartPainter({required this.weekMoods, required this.isDark});
+  _MoodChartPainter({required this.weekMoods});
 
   double _moodToY(MoodOption mood, double height) {
-    // Map mood to 0..1 from bottom to top
     const ids = ['awful', 'low', 'okay', 'good', 'amazing'];
     final idx = ids.indexOf(mood.id);
     final fraction = idx / (ids.length - 1);
@@ -874,7 +1421,6 @@ class _MoodChartPainter extends CustomPainter {
     final h = size.height;
     final segmentW = w / 6;
 
-    // Collect valid points
     final points = <Offset>[];
     final moods = <MoodOption>[];
     for (int i = 0; i < 7; i++) {
@@ -887,20 +1433,14 @@ class _MoodChartPainter extends CustomPainter {
     }
 
     if (points.length < 2) {
-      // Draw just dots if < 2 points
       for (int i = 0; i < points.length; i++) {
         _drawMoodDot(canvas, points[i], moods[i]);
       }
-
       if (points.isEmpty) {
-        // Draw placeholder
         final placeholderPaint = Paint()
-          ..color = (isDark ? Colors.white : Colors.black).withValues(
-            alpha: 0.08,
-          )
+          ..color = Colors.black.withValues(alpha: 0.08)
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke;
-
         final path = Path();
         path.moveTo(0, h * 0.6);
         path.cubicTo(w * 0.2, h * 0.3, w * 0.4, h * 0.7, w * 0.5, h * 0.45);
@@ -910,18 +1450,15 @@ class _MoodChartPainter extends CustomPainter {
       return;
     }
 
-    // Draw smooth curve through points
     for (int i = 0; i < points.length - 1; i++) {
       final p1 = points[i];
       final p2 = points[i + 1];
       final color1 = moods[i].color;
       final color2 = moods[i + 1].color;
 
-      // Gradient line segment
       final linePaint = Paint()
-        ..shader = LinearGradient(
-          colors: [color1, color2],
-        ).createShader(Rect.fromPoints(p1, p2))
+        ..shader = LinearGradient(colors: [color1, color2])
+            .createShader(Rect.fromPoints(p1, p2))
         ..strokeWidth = 3
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round;
@@ -930,36 +1467,21 @@ class _MoodChartPainter extends CustomPainter {
       path.moveTo(p1.dx, p1.dy);
       final controlX = (p2.dx - p1.dx) * 0.5;
       path.cubicTo(
-        p1.dx + controlX,
-        p1.dy,
-        p2.dx - controlX,
-        p2.dy,
-        p2.dx,
-        p2.dy,
-      );
+          p1.dx + controlX, p1.dy, p2.dx - controlX, p2.dy, p2.dx, p2.dy);
       canvas.drawPath(path, linePaint);
     }
 
-    // Draw fill under curve
     if (points.length >= 2) {
       final fillPath = Path();
       fillPath.moveTo(points.first.dx, h);
       fillPath.lineTo(points.first.dx, points.first.dy);
-
       for (int i = 0; i < points.length - 1; i++) {
         final p1 = points[i];
         final p2 = points[i + 1];
         final controlX = (p2.dx - p1.dx) * 0.5;
         fillPath.cubicTo(
-          p1.dx + controlX,
-          p1.dy,
-          p2.dx - controlX,
-          p2.dy,
-          p2.dx,
-          p2.dy,
-        );
+            p1.dx + controlX, p1.dy, p2.dx - controlX, p2.dy, p2.dx, p2.dy);
       }
-
       fillPath.lineTo(points.last.dx, h);
       fillPath.close();
 
@@ -976,32 +1498,27 @@ class _MoodChartPainter extends CustomPainter {
       canvas.drawPath(fillPath, fillPaint);
     }
 
-    // Draw dots on top
     for (int i = 0; i < points.length; i++) {
       _drawMoodDot(canvas, points[i], moods[i]);
     }
   }
 
   void _drawMoodDot(Canvas canvas, Offset center, MoodOption mood) {
-    // Outer glow
     final glowPaint = Paint()
       ..color = mood.color.withValues(alpha: 0.2)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 14, glowPaint);
 
-    // Main dot
     final dotPaint = Paint()
       ..color = mood.color
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 10, dotPaint);
 
-    // White inner circle
     final innerPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.9)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, 6, innerPaint);
 
-    // Emoji text
     final textPainter = TextPainter(
       text: TextSpan(text: mood.emoji, style: const TextStyle(fontSize: 10)),
       textDirection: ui.TextDirection.ltr,
