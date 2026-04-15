@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +8,7 @@ import '../models/saved_widget_model.dart';
 import '../services/mood_service.dart';
 import '../services/saved_widgets_service.dart';
 import '../services/home_widget_service.dart';
+import '../widgets/detail_hero_shell.dart';
 
 // ──────────────────────────────────────────
 //  Theme data (matches timer/quote/notepad/habit)
@@ -282,213 +282,63 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
   // ────────── Hero Preview ──────────
 
   Widget _buildHeroPreview(MoodOption selectedMood) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      height: 300,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            _theme.cardColor,
-            _theme.secondary.withValues(alpha: 0.4),
-            _theme.background,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: _theme.primary.withValues(alpha: 0.15),
-            blurRadius: 30,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            ..._buildDecorations(),
-
-            // Centered mood preview
-            Center(
-              child: AnimatedBuilder(
-                animation: _breathAnim,
-                builder: (context, child) {
-                  return Container(
-                    width: 200,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 24, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.88),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _theme.primary.withValues(
-                              alpha: 0.1 + _breathAnim.value * 0.06),
-                          blurRadius: 24 + _breathAnim.value * 8,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                      border: Border.all(
-                        color: _theme.primary.withValues(alpha: 0.15),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Mood emoji
-                        Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: selectedMood.color
-                                .withValues(alpha: 0.15),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              selectedMood.emoji,
-                              style: const TextStyle(fontSize: 30),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          selectedMood.label,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: _theme.textColor,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _checkInCount > 0
-                              ? '$_checkInCount check-ins'
-                              : 'No check-ins yet',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color:
-                                _theme.textColor.withValues(alpha: 0.4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Nav buttons
-            SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _iconBtn(
-                      icon: Icons.arrow_back_rounded,
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    Row(
-                      children: [
-                        _iconBtn(
-                          icon: _isFavorite
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          onTap: () =>
-                              setState(() => _isFavorite = !_isFavorite),
-                          color: _isFavorite ? Colors.redAccent : null,
-                        ),
-                        const SizedBox(width: 8),
-                        _iconBtn(
-                          icon: Icons.share_rounded,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return DetailHeroShell(
+      primary: _theme.primary,
+      secondary: _theme.secondary,
+      accent: _theme.accent,
+      cardColor: _theme.cardColor,
+      background: _theme.background,
+      textColor: _theme.textColor,
+      breathAnimation: _breathAnim,
+      onBack: () => Navigator.pop(context),
+      isFavorite: _isFavorite,
+      onFavoriteToggle: () => setState(() => _isFavorite = !_isFavorite),
+      onShare: () {},
+      emotionalLabel: 'Feel & Reflect 🌿',
+      decorationSeed: 55,
+      content: _buildMoodHeroContent(selectedMood),
     );
   }
 
-  Widget _iconBtn({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+  Widget _buildMoodHeroContent(MoodOption selectedMood) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            color: selectedMood.color.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              selectedMood.emoji,
+              style: const TextStyle(fontSize: 30),
             ),
-          ],
+          ),
         ),
-        child: Icon(icon,
-            size: 20,
-            color: color ?? _theme.textColor.withValues(alpha: 0.7)),
-      ),
+        const SizedBox(height: 12),
+        Text(
+          selectedMood.label,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: _theme.textColor,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _checkInCount > 0
+              ? '$_checkInCount check-ins'
+              : 'No check-ins yet',
+          style: TextStyle(
+            fontSize: 12,
+            color: _theme.textColor.withValues(alpha: 0.4),
+          ),
+        ),
+      ],
     );
-  }
-
-  List<Widget> _buildDecorations() {
-    final rng = Random(55);
-    final List<Widget> items = [];
-    final blobColors = [
-      _theme.primary.withValues(alpha: 0.1),
-      _theme.secondary.withValues(alpha: 0.12),
-      const Color(0xFFFFD6E0).withValues(alpha: 0.12),
-      const Color(0xFFD4E8D0).withValues(alpha: 0.12),
-    ];
-    for (int i = 0; i < 5; i++) {
-      final size = 35.0 + rng.nextDouble() * 55;
-      items.add(Positioned(
-        left: rng.nextDouble() * 300,
-        top: rng.nextDouble() * 250,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: blobColors[i % blobColors.length],
-          ),
-        ),
-      ));
-    }
-    for (int i = 0; i < 12; i++) {
-      final s = 3.0 + rng.nextDouble() * 5;
-      items.add(Positioned(
-        left: rng.nextDouble() * 340,
-        top: rng.nextDouble() * 280,
-        child: Container(
-          width: s,
-          height: s,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _theme.primary
-                .withValues(alpha: 0.15 + rng.nextDouble() * 0.15),
-          ),
-        ),
-      ));
-    }
-    return items;
   }
 
   // ────────── Info Card ──────────

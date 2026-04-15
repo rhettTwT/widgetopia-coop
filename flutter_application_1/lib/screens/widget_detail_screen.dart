@@ -209,55 +209,133 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen> {
                   children: [
                     /// HERO IMAGE
                     Container(
-                      height: 240,
+                      height: 260,
                       margin: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(28),
                         gradient: const LinearGradient(
-                          colors: [Color(0xFFFFEDD5), Color(0xFFFED7AA)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
+                          stops: [0.0, 0.4, 0.75, 1.0],
+                          colors: [
+                            Color(0xFFFFF8F0), // cream
+                            Color(0xFFFFE8CC), // warm peach
+                            Color(0xFFFFD6A8), // caramel
+                            Color(0xFFF5C28A), // golden
+                          ],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFF97316)
-                                .withValues(alpha: 0.15),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
+                            color: Color(0xFFD4A574),
+                            blurRadius: 36,
+                            offset: Offset(0, 14),
+                            spreadRadius: -8,
+                          ),
+                          BoxShadow(
+                            color: Color(0xFFC08552),
+                            blurRadius: 60,
+                            offset: Offset(0, 24),
+                            spreadRadius: -15,
                           ),
                         ],
                       ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 16,
-                            left: 16,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF59E0B),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                'Featured',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  letterSpacing: 0.5,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(28),
+                        child: Stack(
+                          children: [
+                            // Inner highlight (top light)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: 80,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.white.withValues(alpha: 0.25),
+                                      Colors.white.withValues(alpha: 0.0),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Center(
-                            child: Icon(
-                              Icons.widgets_rounded,
-                              size: 80,
-                              color: Colors.white.withValues(alpha: 0.6),
+
+                            // Radial glow behind icon
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: RadialGradient(
+                                    center: Alignment.center,
+                                    radius: 0.5,
+                                    colors: [
+                                      Colors.white.withValues(alpha: 0.25),
+                                      Colors.white.withValues(alpha: 0.0),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+
+                            // Featured badge
+                            Positioned(
+                              top: 16,
+                              left: 16,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFC08552),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFC08552)
+                                          .withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Text(
+                                  'Featured',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            // Center icon with glow
+                            Center(
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.35),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFD4A574)
+                                          .withValues(alpha: 0.2),
+                                      blurRadius: 24,
+                                      spreadRadius: 4,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.widgets_rounded,
+                                  size: 48,
+                                  color: Colors.white.withValues(alpha: 0.85),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 

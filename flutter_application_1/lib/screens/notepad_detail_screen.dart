@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:widgetopia/models/note_model.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
+import 'package:widgetopia/widgets/detail_hero_shell.dart';
 
 // ──────────────────────────────────────────
 //  Notepad theme data (matches timer/calendar)
@@ -362,250 +362,86 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen>
         .length;
     final totalItems = _notes.expand((n) => n.checklist).length;
 
-    return Container(
-      margin: const EdgeInsets.all(16),
-      height: 300,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            _theme.cardColor,
-            _theme.secondary.withValues(alpha: 0.4),
-            _theme.background,
-          ],
+    return DetailHeroShell(
+      primary: _theme.primary,
+      secondary: _theme.secondary,
+      accent: _theme.accent,
+      cardColor: _theme.cardColor,
+      background: _theme.background,
+      textColor: _theme.textColor,
+      breathAnimation: _breathAnim,
+      onBack: () => Navigator.pop(context),
+      isFavorite: _isFavorite,
+      onFavoriteToggle: () => setState(() => _isFavorite = !_isFavorite),
+      onShare: () {},
+      emotionalLabel: 'Capture Ideas 📝',
+      decorationSeed: 42,
+      content: _buildNotepadHeroContent(noteCount, checkCount, totalItems),
+    );
+  }
+
+  Widget _buildNotepadHeroContent(int noteCount, int checkCount, int totalItems) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: _theme.primary.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.edit_note_rounded,
+            size: 26,
+            color: _theme.accent,
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: _theme.primary.withValues(alpha: 0.15),
-            blurRadius: 30,
-            offset: const Offset(0, 12),
+        const SizedBox(height: 12),
+        Text(
+          'Notepad',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            color: _theme.textColor,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '$noteCount notes',
+          style: TextStyle(
+            fontSize: 12,
+            color: _theme.textColor.withValues(alpha: 0.4),
+          ),
+        ),
+        if (totalItems > 0) ...[
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: totalItems > 0
+                  ? checkCount / totalItems
+                  : 0,
+              minHeight: 4,
+              backgroundColor:
+                  _theme.primary.withValues(alpha: 0.15),
+              color: _theme.primary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$checkCount/$totalItems done',
+            style: TextStyle(
+              fontSize: 10,
+              color:
+                  _theme.textColor.withValues(alpha: 0.35),
+            ),
           ),
         ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            ..._buildDecorations(),
-
-            // Centered hero notepad icon
-            Center(
-              child: AnimatedBuilder(
-                animation: _breathAnim,
-                builder: (context, child) {
-                  return Container(
-                    width: 200,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 24, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.88),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _theme.primary.withValues(
-                              alpha: 0.1 + _breathAnim.value * 0.06),
-                          blurRadius: 24 + _breathAnim.value * 8,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                      border: Border.all(
-                        color: _theme.primary.withValues(alpha: 0.15),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Pencil icon
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: _theme.primary.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.edit_note_rounded,
-                            size: 26,
-                            color: _theme.accent,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Notepad',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w300,
-                            fontStyle: FontStyle.italic,
-                            color: _theme.textColor,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '$noteCount notes',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _theme.textColor.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        if (totalItems > 0) ...[
-                          const SizedBox(height: 8),
-                          // Tiny progress bar for checklists
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: totalItems > 0
-                                  ? checkCount / totalItems
-                                  : 0,
-                              minHeight: 4,
-                              backgroundColor:
-                                  _theme.primary.withValues(alpha: 0.15),
-                              color: _theme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$checkCount/$totalItems done',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color:
-                                  _theme.textColor.withValues(alpha: 0.35),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Nav buttons
-            SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _iconBtn(
-                      icon: Icons.arrow_back_rounded,
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    Row(
-                      children: [
-                        _iconBtn(
-                          icon: _isFavorite
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          onTap: () =>
-                              setState(() => _isFavorite = !_isFavorite),
-                          color: _isFavorite ? Colors.redAccent : null,
-                        ),
-                        const SizedBox(width: 8),
-                        _iconBtn(
-                          icon: Icons.share_rounded,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
-  }
-
-  Widget _iconBtn({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(icon,
-            size: 20,
-            color: color ?? _theme.textColor.withValues(alpha: 0.7)),
-      ),
-    );
-  }
-
-  List<Widget> _buildDecorations() {
-    final rng = Random(42);
-    final List<Widget> items = [];
-    final blobColors = [
-      _theme.primary.withValues(alpha: 0.1),
-      _theme.secondary.withValues(alpha: 0.12),
-      const Color(0xFFFFD6E0).withValues(alpha: 0.12),
-      const Color(0xFFD4E8D0).withValues(alpha: 0.12),
-    ];
-    for (int i = 0; i < 5; i++) {
-      final size = 35.0 + rng.nextDouble() * 55;
-      items.add(Positioned(
-        left: rng.nextDouble() * 300,
-        top: rng.nextDouble() * 250,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: blobColors[i % blobColors.length],
-          ),
-        ),
-      ));
-    }
-    for (int i = 0; i < 10; i++) {
-      final s = 3.0 + rng.nextDouble() * 5;
-      items.add(Positioned(
-        left: rng.nextDouble() * 340,
-        top: rng.nextDouble() * 280,
-        child: Container(
-          width: s,
-          height: s,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _theme.primary
-                .withValues(alpha: 0.15 + rng.nextDouble() * 0.15),
-          ),
-        ),
-      ));
-    }
-    // Tiny line decorations (like ruled paper)
-    for (int i = 0; i < 4; i++) {
-      items.add(Positioned(
-        left: 30 + rng.nextDouble() * 80,
-        top: 60 + i * 55.0,
-        child: Container(
-          width: 60 + rng.nextDouble() * 40,
-          height: 1.5,
-          decoration: BoxDecoration(
-            color: _theme.primary.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(1),
-          ),
-        ),
-      ));
-    }
-    return items;
   }
 
   // ────────── Info Card ──────────

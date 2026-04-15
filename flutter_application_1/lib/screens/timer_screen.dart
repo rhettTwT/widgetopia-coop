@@ -8,6 +8,7 @@ import 'package:widgetopia/services/timer_preset_service.dart';
 import 'package:widgetopia/models/saved_widget_model.dart';
 import 'package:widgetopia/services/saved_widgets_service.dart';
 import 'package:widgetopia/services/home_widget_service.dart';
+import 'package:widgetopia/widgets/detail_hero_shell.dart';
 
 // ──────────────────────────────────────────
 //  Theme data
@@ -774,264 +775,76 @@ class _TimerScreenState extends State<TimerScreen>
   // ────────── Hero Preview ──────────
 
   Widget _buildHeroPreview() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      height: 300,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            _theme.cardColor,
-            _theme.secondary.withValues(alpha: 0.4),
-            _theme.background,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: _theme.primary.withValues(alpha: 0.15),
-            blurRadius: 30,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          children: [
-            // Decorative sparkles & blobs
-            ..._buildDecorations(),
+    return DetailHeroShell(
+      primary: _theme.primary,
+      secondary: _theme.secondary,
+      accent: _theme.accent,
+      cardColor: _theme.cardColor,
+      background: _theme.background,
+      textColor: _theme.textColor,
+      breathAnimation: _breathAnim,
+      onBack: () => Navigator.pop(context),
+      isFavorite: _isFavorite,
+      onFavoriteToggle: () => setState(() => _isFavorite = !_isFavorite),
+      onShare: () {},
+      emotionalLabel: 'Deep Focus ☕',
+      decorationSeed: 42,
+      content: _buildTimerHeroContent(),
+    );
+  }
 
-            // Subtle gradient overlay
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: Alignment.center,
-                    radius: 0.8,
-                    colors: [
-                      Colors.white.withValues(alpha: 0.0),
-                      _theme.primary.withValues(alpha: 0.05),
-                    ],
+  Widget _buildTimerHeroContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 170,
+          height: 170,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Progress ring
+              SizedBox(
+                width: 160,
+                height: 160,
+                child: CustomPaint(
+                  painter: _TimerRingPainter(
+                    progress: _progress,
+                    trackColor: _theme.secondary.withValues(alpha: 0.25),
+                    progressColor: _theme.primary,
+                    glowColor: _theme.accent,
+                    strokeWidth: 6,
                   ),
                 ),
               ),
-            ),
-
-            // Timer widget preview (centered clock display)
-            Center(
-              child: AnimatedBuilder(
-                animation: _breathAnim,
-                builder: (context, child) {
-                  return Container(
-                    width: 180,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      boxShadow: [
-                        BoxShadow(
-                          color: _theme.primary.withValues(
-                              alpha: 0.12 + _breathAnim.value * 0.08),
-                          blurRadius: 30 + _breathAnim.value * 10,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                      border: Border.all(
-                        color: _theme.primary.withValues(alpha: 0.2),
-                        width: 2,
-                      ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _format(_seconds),
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w700,
+                      color: _theme.textColor,
+                      letterSpacing: 2,
                     ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Mini progress ring
-                        SizedBox(
-                          width: 160,
-                          height: 160,
-                          child: CustomPaint(
-                            painter: _TimerRingPainter(
-                              progress: _progress,
-                              trackColor:
-                                  _theme.secondary.withValues(alpha: 0.25),
-                              progressColor: _theme.primary,
-                              glowColor: _theme.accent,
-                              strokeWidth: 6,
-                            ),
-                          ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              _format(_seconds),
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w700,
-                                color: _theme.textColor,
-                                letterSpacing: 2,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _theme.name,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: _theme.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _theme.name,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: _theme.primary,
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            ),
-
-            // Back / Favorite / Share buttons
-            SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _iconBtn(
-                      icon: Icons.arrow_back_rounded,
-                      onTap: () => Navigator.pop(context),
-                    ),
-                    Row(
-                      children: [
-                        _iconBtn(
-                          icon: _isFavorite
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          onTap: () =>
-                              setState(() => _isFavorite = !_isFavorite),
-                          color: _isFavorite ? Colors.redAccent : null,
-                        ),
-                        const SizedBox(width: 8),
-                        _iconBtn(
-                          icon: Icons.share_rounded,
-                          onTap: () {},
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
-  }
-
-  Widget _iconBtn({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.85),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          size: 20,
-          color: color ?? _theme.textColor.withValues(alpha: 0.7),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildDecorations() {
-    final rng = Random(42); // fixed seed for consistent layout
-    final List<Widget> decorations = [];
-
-    // Pastel blobs
-    final blobColors = [
-      _theme.primary.withValues(alpha: 0.12),
-      _theme.secondary.withValues(alpha: 0.15),
-      const Color(0xFFFFD6E0).withValues(alpha: 0.15), // pink
-      const Color(0xFFD4E8D0).withValues(alpha: 0.15), // sage
-    ];
-    for (int i = 0; i < 5; i++) {
-      final size = 40.0 + rng.nextDouble() * 60;
-      decorations.add(
-        Positioned(
-          left: rng.nextDouble() * 300,
-          top: rng.nextDouble() * 250,
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: blobColors[i % blobColors.length],
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Sparkle dots
-    for (int i = 0; i < 12; i++) {
-      final dotSize = 3.0 + rng.nextDouble() * 5;
-      decorations.add(
-        Positioned(
-          left: rng.nextDouble() * 340,
-          top: rng.nextDouble() * 280,
-          child: Container(
-            width: dotSize,
-            height: dotSize,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: _theme.primary
-                  .withValues(alpha: 0.2 + rng.nextDouble() * 0.15),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Diamond shapes
-    for (int i = 0; i < 4; i++) {
-      final dSize = 8.0 + rng.nextDouble() * 10;
-      decorations.add(
-        Positioned(
-          left: rng.nextDouble() * 320,
-          top: rng.nextDouble() * 260,
-          child: Transform.rotate(
-            angle: pi / 4,
-            child: Container(
-              width: dSize,
-              height: dSize,
-              decoration: BoxDecoration(
-                color: _theme.accent.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return decorations;
   }
 
   // ────────── Info Card ──────────
