@@ -296,6 +296,16 @@ class _CalendarScreenState extends State<CalendarScreen>
       onShare: () {},
       emotionalLabel: 'Plan Your Days 📅',
       decorationSeed: 77,
+      onContentTap: () {
+        setState(() {
+          _selectedDay = _selectedDay.add(const Duration(days: 1));
+          // If we jump into next month, follow along
+          if (_selectedDay.month != _focusedMonth.month ||
+              _selectedDay.year != _focusedMonth.year) {
+            _focusedMonth = DateTime(_selectedDay.year, _selectedDay.month);
+          }
+        });
+      },
       content: _buildCalendarHeroContent(monthName, dayName, now),
     );
   }

@@ -365,6 +365,7 @@ class _QuoteScreenState extends State<QuoteScreen>
       onShare: () {},
       emotionalLabel: 'Daily Wisdom ✨',
       decorationSeed: 99,
+      onContentTap: _nextQuote,
       content: _buildQuoteHeroContent(),
     );
   }

@@ -376,6 +376,14 @@ class _NotepadDetailScreenState extends State<NotepadDetailScreen>
       onShare: () {},
       emotionalLabel: 'Capture Ideas 📝',
       decorationSeed: 42,
+      onContentTap: () {
+        if (_notes.isEmpty) return;
+        final curIdx = _activeNote != null
+            ? _notes.indexWhere((n) => n.id == _activeNote!.id)
+            : -1;
+        final nextIdx = (curIdx + 1) % _notes.length;
+        _selectNote(_notes[nextIdx]);
+      },
       content: _buildNotepadHeroContent(noteCount, checkCount, totalItems),
     );
   }

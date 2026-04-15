@@ -296,6 +296,12 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen>
       onShare: () {},
       emotionalLabel: 'Feel & Reflect 🌿',
       decorationSeed: 55,
+      onContentTap: () {
+        final ids = moodOptions.map((m) => m.id).toList();
+        final curIdx = ids.indexOf(_selectedMoodId ?? ids.first);
+        setState(() => _selectedMoodId = ids[(curIdx + 1) % ids.length]);
+        _saveToday();
+      },
       content: _buildMoodHeroContent(selectedMood),
     );
   }

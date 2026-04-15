@@ -269,6 +269,15 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen>
       onShare: () {},
       emotionalLabel: 'Build Momentum 🔥',
       decorationSeed: 77,
+      onContentTap: () {
+        final incomplete = _habits.where((h) => !h.isCompletedToday).toList();
+        if (incomplete.isNotEmpty) {
+          _toggleHabit(incomplete.first);
+        } else if (_habits.isNotEmpty) {
+          // All done — un-toggle last one for demo feedback
+          _toggleHabit(_habits.last);
+        }
+      },
       content: _buildHabitHeroContent(bestStreak),
     );
   }

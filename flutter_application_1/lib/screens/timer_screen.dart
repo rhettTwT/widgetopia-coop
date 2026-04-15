@@ -789,6 +789,7 @@ class _TimerScreenState extends State<TimerScreen>
       onShare: () {},
       emotionalLabel: 'Deep Focus ☕',
       decorationSeed: 42,
+      onContentTap: _startPause,
       content: _buildTimerHeroContent(),
     );
   }
