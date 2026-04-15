@@ -73,10 +73,7 @@ class WidgetopiaApp extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: c.textPrimary,
         ),
-        bodyMedium: TextStyle(
-          fontSize: 16,
-          color: c.textPrimary,
-        ),
+        bodyMedium: TextStyle(fontSize: 16, color: c.textPrimary),
       ),
     );
   }
@@ -119,7 +116,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   void _handleDeepLink(Uri? uri) {
     if (uri == null || uri.scheme != 'widgetopia') return;
-    
+
     final host = uri.host;
     Widget? targetScreen;
 
@@ -142,12 +139,11 @@ class _MainNavigationState extends State<MainNavigation> {
     }
 
     if (targetScreen != null && mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => targetScreen!),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => targetScreen!));
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -155,10 +151,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
     return Scaffold(
       backgroundColor: c.scaffoldBg,
-      body: IndexedStack(
-        index: _index,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _index, children: _pages),
       // ─── Floating bottom nav ───
       bottomNavigationBar: SafeArea(
         child: Container(
@@ -284,5 +277,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-
-
