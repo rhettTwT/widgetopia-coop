@@ -135,31 +135,34 @@ class _DetailHeroShellState extends State<DetailHeroShell>
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(20),
-      height: 340,
+      height: 380,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(32),
+        // Deep base gradient — concave stage feel
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: const [0.0, 0.4, 0.75, 1.0],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.0, 0.3, 0.7, 1.0],
           colors: [
-            Color.lerp(widget.cardColor, const Color(0xFF3E2723), 0.12)!, // espresso hint
+            Color.lerp(widget.cardColor, const Color(0xFF3E2723), 0.18)!,
+            Color.lerp(widget.cardColor, widget.primary, 0.08)!,
             widget.cardColor,
-            widget.secondary.withValues(alpha: 0.45),
-            widget.background,
+            Color.lerp(widget.background, widget.secondary, 0.15)!,
           ],
         ),
         boxShadow: [
+          // Primary depth shadow
           BoxShadow(
-            color: widget.primary.withValues(alpha: 0.18),
-            blurRadius: 40,
-            offset: const Offset(0, 16),
+            color: widget.primary.withValues(alpha: 0.22),
+            blurRadius: 48,
+            offset: const Offset(0, 18),
           ),
+          // Distant ambient glow
           BoxShadow(
-            color: widget.accent.withValues(alpha: 0.06),
-            blurRadius: 80,
-            spreadRadius: -10,
-            offset: const Offset(0, 30),
+            color: widget.accent.withValues(alpha: 0.10),
+            blurRadius: 90,
+            spreadRadius: -8,
+            offset: const Offset(0, 32),
           ),
         ],
       ),
@@ -167,30 +170,100 @@ class _DetailHeroShellState extends State<DetailHeroShell>
         borderRadius: BorderRadius.circular(32),
         child: Stack(
           children: [
-            // ── Layer 1: Blurred blobs ──
+            // ── Layer 1: Blurred blobs (softened) ──
             ..._buildBlurredBlobs(),
 
-            // ── Layer 2: Grain / noise texture ──
+            // ── Layer 1b: Secondary radial wash from below ──
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(0.0, 0.9),
+                    radius: 1.0,
+                    colors: [
+                      widget.secondary.withValues(alpha: 0.10),
+                      widget.secondary.withValues(alpha: 0.03),
+                      Colors.transparent,
+                    ],
+                    stops: const [0.0, 0.45, 1.0],
+                  ),
+                ),
+              ),
+            ),
+
+            // ── Layer 2: Grain / noise texture (reduced) ──
             Positioned.fill(
               child: CustomPaint(
                 painter: _GrainPainter(
-                  opacity: 0.035,
+                  opacity: 0.018,
                   seed: widget.decorationSeed,
                 ),
               ),
             ),
 
-            // ── Layer 3: Radial glow behind content ──
+            // ── Layer 3a: Outer ambient glow ──
             Positioned.fill(
+              child: AnimatedBuilder(
+                animation: widget.breathAnimation,
+                builder: (context, child) {
+                  final pulse = widget.breathAnimation.value;
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(0, 0.05),
+                        radius: 0.85,
+                        colors: [
+                          widget.primary.withValues(alpha: 0.07 + pulse * 0.03),
+                          widget.primary.withValues(alpha: 0.02),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.55, 1.0],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // ── Layer 3b: Inner spotlight glow ──
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: widget.breathAnimation,
+                builder: (context, child) {
+                  final pulse = widget.breathAnimation.value;
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(0, 0.0),
+                        radius: 0.4,
+                        colors: [
+                          widget.primary.withValues(alpha: 0.14 + pulse * 0.04),
+                          widget.primary.withValues(alpha: 0.04),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // ── Layer 4: Inner highlight (top light sweep) ──
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 120,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: const Alignment(0, 0.1),
-                    radius: 0.6,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                     colors: [
-                      widget.primary.withValues(alpha: 0.10),
-                      widget.primary.withValues(alpha: 0.03),
-                      Colors.transparent,
+                      Colors.white.withValues(alpha: 0.16),
+                      Colors.white.withValues(alpha: 0.04),
+                      Colors.white.withValues(alpha: 0.0),
                     ],
                     stops: const [0.0, 0.5, 1.0],
                   ),
@@ -198,40 +271,38 @@ class _DetailHeroShellState extends State<DetailHeroShell>
               ),
             ),
 
-            // ── Layer 4: Inner highlight (top light) ──
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 100,
+            // ── Layer 4b: Vignette (darken edges for focal contrast) ──
+            Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 0.75,
                     colors: [
-                      Colors.white.withValues(alpha: 0.12),
-                      Colors.white.withValues(alpha: 0.0),
+                      Colors.transparent,
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.06),
                     ],
+                    stops: const [0.0, 0.6, 1.0],
                   ),
                 ),
               ),
             ),
 
-            // ── Layer 5: Steam-like curves ──
+            // ── Layer 5: Steam-like curves (subtler) ──
             Positioned.fill(
               child: CustomPaint(
                 painter: _SteamCurvesPainter(
-                  color: widget.primary.withValues(alpha: 0.04),
+                  color: widget.primary.withValues(alpha: 0.02),
                   seed: widget.decorationSeed,
                 ),
               ),
             ),
 
-            // ── Layer 6: Sparkle dots ──
+            // ── Layer 6: Sparkle dots (reduced) ──
             ..._buildSparkles(),
 
-            // ── Layer 7: Interactive content card with depth ──
+            // ── Layer 7: Elevated content card — floating showcase ──
             Center(
               child: AnimatedBuilder(
                 animation: Listenable.merge([
@@ -240,47 +311,73 @@ class _DetailHeroShellState extends State<DetailHeroShell>
                   _tapGlowAnim,
                 ]),
                 builder: (context, child) {
+                  final pulse = widget.breathAnimation.value;
                   final borderAlpha = widget.onContentTap != null
                       ? _tapGlowAnim.value
-                      : 0.12;
+                      : 0.10;
                   return GestureDetector(
                     onTap: _handleTap,
                     child: Transform.scale(
-                      scale: _tapScaleAnim.value,
+                      scale: 1.05 * _tapScaleAnim.value,
                       child: Container(
                         constraints: const BoxConstraints(maxWidth: 230),
                         padding: const EdgeInsets.symmetric(
                             vertical: 24, horizontal: 22),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.92),
-                          borderRadius: BorderRadius.circular(24),
+                          color: Colors.white.withValues(alpha: 0.94),
+                          borderRadius: BorderRadius.circular(26),
                           boxShadow: [
-                            // Close shadow (depth)
+                            // Close depth shadow
                             BoxShadow(
                               color: widget.primary.withValues(
-                                  alpha: 0.08 +
-                                      widget.breathAnimation.value * 0.04),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                                  alpha: 0.12 + pulse * 0.04),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
                             ),
-                            // Far glow (ambient)
+                            // Mid-range ambient glow
                             BoxShadow(
                               color: widget.primary.withValues(
-                                  alpha: 0.10 +
-                                      widget.breathAnimation.value * 0.06),
-                              blurRadius:
-                                  32 + widget.breathAnimation.value * 10,
+                                  alpha: 0.10 + pulse * 0.05),
+                              blurRadius: 36 + pulse * 10,
                               spreadRadius: 2,
+                            ),
+                            // Far floating glow — stage separation
+                            BoxShadow(
+                              color: widget.primary.withValues(
+                                  alpha: 0.06 + pulse * 0.03),
+                              blurRadius: 60,
+                              spreadRadius: 8,
                             ),
                           ],
                           border: Border.all(
                             color:
                                 widget.primary.withValues(alpha: borderAlpha),
-                            width: 1.5,
+                            width: 1.2,
                           ),
                         ),
                         child: Stack(
                           children: [
+                            // Inner top-edge highlight (light direction)
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: 40,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(26)),
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.white.withValues(alpha: 0.35),
+                                      Colors.white.withValues(alpha: 0.0),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                             // Smooth cross-fade for content changes
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 200),
@@ -390,26 +487,25 @@ class _DetailHeroShellState extends State<DetailHeroShell>
     );
   }
 
-  // ─── Blurred blob decorations ───
+  // ─── Blurred blob decorations (fewer, softer) ───
   List<Widget> _buildBlurredBlobs() {
     final rng = Random(widget.decorationSeed);
     final List<Widget> blobs = [];
     final blobColors = [
-      widget.primary.withValues(alpha: 0.10),
-      widget.secondary.withValues(alpha: 0.12),
-      widget.accent.withValues(alpha: 0.06),
-      const Color(0xFFFFD6C0).withValues(alpha: 0.10), // warm peach
-      const Color(0xFFF5E6D3).withValues(alpha: 0.12), // light cream
+      widget.primary.withValues(alpha: 0.08),
+      widget.secondary.withValues(alpha: 0.09),
+      widget.accent.withValues(alpha: 0.05),
+      const Color(0xFFFFD6C0).withValues(alpha: 0.07),
     ];
 
-    for (int i = 0; i < 6; i++) {
-      final size = 50.0 + rng.nextDouble() * 80;
+    for (int i = 0; i < 4; i++) {
+      final size = 60.0 + rng.nextDouble() * 90;
       blobs.add(
         Positioned(
           left: -20 + rng.nextDouble() * 360,
-          top: -20 + rng.nextDouble() * 320,
+          top: -20 + rng.nextDouble() * 360,
           child: ImageFiltered(
-            imageFilter: ui.ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+            imageFilter: ui.ImageFilter.blur(sigmaX: 35, sigmaY: 35),
             child: Container(
               width: size,
               height: size,
@@ -425,24 +521,24 @@ class _DetailHeroShellState extends State<DetailHeroShell>
     return blobs;
   }
 
-  // ─── Sparkle dot decorations ───
+  // ─── Sparkle dot decorations (reduced) ───
   List<Widget> _buildSparkles() {
     final rng = Random(widget.decorationSeed + 100);
     final List<Widget> sparkles = [];
 
-    for (int i = 0; i < 14; i++) {
-      final dotSize = 2.5 + rng.nextDouble() * 4;
+    for (int i = 0; i < 8; i++) {
+      final dotSize = 2.0 + rng.nextDouble() * 3;
       sparkles.add(
         Positioned(
           left: rng.nextDouble() * 360,
-          top: rng.nextDouble() * 320,
+          top: rng.nextDouble() * 360,
           child: Container(
             width: dotSize,
             height: dotSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: widget.primary.withValues(
-                  alpha: 0.12 + rng.nextDouble() * 0.12),
+                  alpha: 0.08 + rng.nextDouble() * 0.08),
             ),
           ),
         ),
