@@ -281,18 +281,18 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
               // ── Hero preview area ──
               SliverToBoxAdapter(child: _buildHeroPreview()),
 
-              // ── Info card ──
+              // ── Info section ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _buildInfoCard(),
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  child: _buildInfoSection(),
                 ),
               ),
 
               // ── Theme Variations ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
                   child: _buildThemeVariations(),
                 ),
               ),
@@ -300,7 +300,7 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
               // ── You might also like ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 36, 20, 0),
                   child: _buildRecommendations(),
                 ),
               ),
@@ -345,169 +345,161 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
     );
   }
 
-  // ────────── Info Card ──────────
+  // ────────── Info Section (open layout) ──────────
 
-  Widget _buildInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _theme.primary.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: _theme.primary.withValues(alpha: 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title + Rating
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.title,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: _theme.textColor,
-                  ),
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8E1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.star_rounded,
-                        color: Color(0xFFFFB800), size: 18),
-                    const SizedBox(width: 3),
-                    Text(
-                      '4.9',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: _theme.textColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Creator
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: _theme.secondary.withValues(alpha: 0.5),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    'W',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: _theme.accent,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'by Widgetopia Studio',
+  Widget _buildInfoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title + Rating
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                widget.title,
                 style: TextStyle(
-                  fontSize: 13,
-                  color: _theme.textColor.withValues(alpha: 0.5),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: _theme.textColor,
+                  height: 1.2,
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // Description
-          Text(
-            _widgetDescription,
-            style: TextStyle(
-              fontSize: 13.5,
-              height: 1.5,
-              color: _theme.textColor.withValues(alpha: 0.65),
             ),
-          ),
-          const SizedBox(height: 14),
+            const SizedBox(width: 12),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF8E1).withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.star_rounded,
+                      color: Color(0xFFFFB800), size: 15),
+                  const SizedBox(width: 3),
+                  Text(
+                    '4.9',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _theme.textColor.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
 
-          // Tags
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: _widgetTags
-                .map((tag) => Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _theme.cardColor,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: _theme.primary.withValues(alpha: 0.15),
-                        ),
-                      ),
-                      child: Text(
-                        tag,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: _theme.accent,
-                        ),
-                      ),
-                    ))
-                .toList(),
-          ),
-          const SizedBox(height: 16),
+        // Creator
+        Row(
+          children: [
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: _theme.secondary.withValues(alpha: 0.35),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  'W',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _theme.accent.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 7),
+            Text(
+              'by Widgetopia Studio',
+              style: TextStyle(
+                fontSize: 12.5,
+                color: _theme.textColor.withValues(alpha: 0.4),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
 
-          // Stats row
-          Row(
-            children: [
-              _statBadge(
-                icon: Icons.download_rounded,
-                value: '12.4k',
-                label: 'downloads',
-                badgeColor: const Color(0xFFFFF0DC),
-                iconColor: _theme.primary,
-              ),
-              const SizedBox(width: 12),
-              _statBadge(
-                icon: Icons.bookmark_rounded,
-                value: '8.2k',
-                label: 'saves',
-                badgeColor: const Color(0xFFE8F5E9),
-                iconColor: const Color(0xFF74B88A),
-              ),
-              const SizedBox(width: 12),
-              _statBadge(
-                icon: Icons.rate_review_rounded,
-                value: '2.4k',
-                label: 'reviews',
-                badgeColor: const Color(0xFFF3E5F5),
-                iconColor: const Color(0xFF9B8EC4),
-              ),
-            ],
+        // Description
+        Text(
+          _widgetDescription,
+          style: TextStyle(
+            fontSize: 14,
+            height: 1.6,
+            color: _theme.textColor.withValues(alpha: 0.55),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 18),
+
+        // Divider
+        Divider(
+          color: _theme.primary.withValues(alpha: 0.06),
+          height: 1,
+        ),
+        const SizedBox(height: 14),
+
+        // Tags (lightweight metadata)
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: _widgetTags
+              .map((tag) => Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: _theme.primary.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      tag,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: _theme.textColor.withValues(alpha: 0.4),
+                      ),
+                    ),
+                  ))
+              .toList(),
+        ),
+        const SizedBox(height: 18),
+
+        // Stats row (demoted as metadata)
+        Row(
+          children: [
+            _statBadge(
+              icon: Icons.download_rounded,
+              value: '12.4k',
+              label: 'downloads',
+              badgeColor: const Color(0xFFFFF0DC),
+              iconColor: _theme.primary,
+            ),
+            const SizedBox(width: 10),
+            _statBadge(
+              icon: Icons.bookmark_rounded,
+              value: '8.2k',
+              label: 'saves',
+              badgeColor: const Color(0xFFE8F5E9),
+              iconColor: const Color(0xFF74B88A),
+            ),
+            const SizedBox(width: 10),
+            _statBadge(
+              icon: Icons.rate_review_rounded,
+              value: '2.4k',
+              label: 'reviews',
+              badgeColor: const Color(0xFFF3E5F5),
+              iconColor: const Color(0xFF9B8EC4),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -520,24 +512,24 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: badgeColor.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(14),
+          color: badgeColor.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 16, color: iconColor),
+                Icon(icon, size: 14, color: iconColor.withValues(alpha: 0.6)),
                 const SizedBox(width: 4),
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: _theme.textColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: _theme.textColor.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -546,8 +538,8 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
-                color: _theme.textColor.withValues(alpha: 0.45),
+                fontSize: 10.5,
+                color: _theme.textColor.withValues(alpha: 0.35),
               ),
             ),
           ],
@@ -562,22 +554,28 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Gentle separator
+        Divider(
+          color: _theme.primary.withValues(alpha: 0.06),
+          height: 1,
+        ),
+        const SizedBox(height: 18),
         Row(
           children: [
             Icon(Icons.palette_rounded,
-                size: 18, color: _theme.textColor.withValues(alpha: 0.5)),
+                size: 16, color: _theme.textColor.withValues(alpha: 0.35)),
             const SizedBox(width: 8),
             Text(
               'Theme Variations',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: _theme.textColor,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _theme.textColor.withValues(alpha: 0.75),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: List.generate(_themes.length, (i) {
@@ -651,22 +649,28 @@ class _WidgetDetailScreenState extends State<WidgetDetailScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Gentle separator
+        Divider(
+          color: _theme.primary.withValues(alpha: 0.06),
+          height: 1,
+        ),
+        const SizedBox(height: 18),
         Row(
           children: [
             Icon(Icons.auto_awesome_rounded,
-                size: 18, color: _theme.textColor.withValues(alpha: 0.5)),
+                size: 16, color: _theme.textColor.withValues(alpha: 0.35)),
             const SizedBox(width: 8),
             Text(
               'You might also like',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: _theme.textColor,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: _theme.textColor.withValues(alpha: 0.75),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         SizedBox(
           height: 180,
           child: ListView.separated(
